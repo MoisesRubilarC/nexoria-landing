@@ -5,6 +5,8 @@ import Hero from '../components/Hero.astro';
 import Icono from '../components/Icono.astro';
 import Clientes from '../components/Clientes.astro';
 import Telemetria from '../components/Telemetria.astro';
+import PanelMonitoreo from '../components/PanelMonitoreo.astro';
+import Cifras from '../components/Cifras.astro';
 
 const servicios = (await getCollection('servicios'))
   .filter((s) => s.data.destacado)
@@ -38,6 +40,7 @@ const pasos = [
   </Hero>
 
   <Telemetria />
+  <Cifras />
 
   <!-- Servicios destacados -->
   <section class="seccion">
@@ -70,6 +73,8 @@ const pasos = [
       </div>
     </div>
   </section>
+
+  <PanelMonitoreo />
 
   <!-- Producto -->
   {productos.length > 0 && (

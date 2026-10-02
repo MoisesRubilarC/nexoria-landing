@@ -1,0 +1,463 @@
+---
+/**
+ * Panel de monitoreo de demostración.
+ *
+ * Los datos son sintéticos, generados con una semilla fija para que el build
+ * sea reproducible. Las variables y sus rangos corresponden a los parámetros
+ * reales de un variador de frecuencia (voltaje, corriente, frecuencia, RPM,
+ * torque, bus DC, temperatura de disipador), pero NO son datos de ningún
+ * cliente.
+ */
+
+// PRNG determinista (mulberry32): mismo build, mismo gráfico.
+function semilla(s: number) {
+  return () => {
+    s |= 0; s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const PUNTOS = 48; // cada 30 min durante 24 h
+const azar = semilla(20261002);
+
+// Corriente de motor (A): turno con dos subidas de carga y un peak al final.
+const serie = Array.from({ length: PUNTOS }, (_, i) => {
+  const h = (i / PUNTOS) * 24;
+  const base =
+    28 +
+    9 * Math.sin((h - 5) / 24 * Math.PI * 2) +
+    5 * Math.sin((h - 2) / 24 * Math.PI * 6);
+  const peak = h > 19.5 && h < 21.5 ? 11 * Math.exp(-((h - 20.5) ** 2) / 0.45) : 0;
+  const valor = base + peak + (azar() - 0.5) * 2.4;
+  const hora = String(Math.floor(h)).padStart(2, '0') + ':' + (i % 2 ? '30' : '00');
+  return { i, hora, valor: Math.max(0, +valor.toFixed(1)) };
+});
+
+const UMBRAL = 45; // A — límite configurado para este equipo
+const valores = serie.map((p) => p.valor);
+const maximo = Math.max(...valores, UMBRAL);
+const minimo = 0;
+const ultimo = serie[serie.length - 1];
+const excedidos = serie.filter((p) => p.valor > UMBRAL).length;
+
+// Geometría del gráfico (viewBox; el SVG escala solo)
+const A = 760, AL = 240;
+const M = { arriba: 16, derecha: 56, abajo: 28, izquierda: 44 };
+const ancho = A - M.izquierda - M.derecha;
+const alto = AL - M.arriba - M.abajo;
+
+const x = (i: number) => M.izquierda + (i / (PUNTOS - 1)) * ancho;
+const y = (v: number) => M.arriba + alto - ((v - minimo) / (maximo - minimo)) * alto;
+
+const linea = serie.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.valor).toFixed(1)}`).join(' ');
+const area = `${linea} L${x(PUNTOS - 1).toFixed(1)},${y(minimo).toFixed(1)} L${x(0).toFixed(1)},${y(minimo).toFixed(1)} Z`;
+
+const marcasY = [0, 15, 30, 45].filter((v) => v <= maximo);
+const marcasX = [0, 12, 24, 36, 47];
+
+// Tarjetas de variables. `chispa` es una miniserie para el sparkline.
+const miniserie = (base: number, amplitud: number, sem: number) => {
+  const r = semilla(sem);
+  return Array.from({ length: 24 }, (_, i) =>
+    +(base + amplitud * Math.sin(i / 3.2) + (r() - 0.5) * amplitud * 0.9).toFixed(1)
+  );
+};
+
+const variables = [
+  { etiqueta: 'Frecuencia', valor: 49.8, unidad: 'Hz', decimales: 1, chispa: miniserie(49.6, 0.5, 11) },
+  { etiqueta: 'Temp. disipador', valor: 41.2, unidad: '°C', decimales: 1, chispa: miniserie(40, 2.4, 22) },
+  { etiqueta: 'Bus DC', valor: 544, unidad: 'V', decimales: 0, chispa: miniserie(544, 6, 33) },
+  { etiqueta: 'Velocidad', valor: 1618, unidad: 'rpm', decimales: 0, chispa: miniserie(1615, 14, 44) },
+  { etiqueta: 'Torque', valor: 62, unidad: '%', decimales: 0, chispa: miniserie(60, 7, 55) },
+];
+
+const chispaD = (datos: number[]) => {
+  const mx = Math.max(...datos), mn = Math.min(...datos);
+  const rango = mx - mn || 1;
+  return datos
+    .map((v, i) => `${i ? 'L' : 'M'}${((i / (datos.length - 1)) * 100).toFixed(1)},${(26 - ((v - mn) / rango) * 22).toFixed(1)}`)
+    .join(' ');
+};
+
+// Eventos: el color nunca va solo, siempre con ícono y texto.
+const eventos = [
+  { estado: 'good', icono: '✓', texto: 'Compresor 10 operando dentro de rango', hora: 'hace 2 min' },
+  { estado: 'warning', icono: '!', texto: 'Corriente sobre umbral durante 40 min', hora: '20:30' },
+  { estado: 'good', icono: '✓', texto: 'Arranque suave completado', hora: '06:12' },
+];
+---
+
+<section class="panel-seccion">
+  <div class="contenedor">
+    <div class="cabecera cabecera--centro revelar">
+      <span class="sobretitulo">Así se ve</span>
+      <h2>Tu planta, <span class="grad">en una sola pantalla</span></h2>
+      <p class="bajada">
+        Una muestra de la plataforma en funcionamiento. Pasa el cursor sobre el gráfico
+        para ver el valor de cada momento.
+      </p>
+    </div>
+
+    <div class="panel revelar">
+      <!-- Barra superior -->
+      <header class="panel__barra">
+        <div class="panel__equipo">
+          <span class="panel__punto" aria-hidden="true"></span>
+          <div>
+            <strong>Compresor 10</strong>
+            <span>Variador Delta VP3000 · Línea 2</span>
+          </div>
+        </div>
+        <div class="panel__estado">
+          <span class="insignia insignia--good"><i aria-hidden="true">●</i> En línea</span>
+          <span class="panel__reloj" id="panel-reloj">--:--:--</span>
+        </div>
+      </header>
+
+      <!-- Gráfico principal, serie única -->
+      <figure class="grafico">
+        <figcaption class="grafico__titulo">
+          <span>Corriente de motor · últimas 24 h</span>
+          <span class="grafico__ultimo">
+            <b id="valor-ultimo">{ultimo.valor.toFixed(1)}</b> A ahora
+          </span>
+        </figcaption>
+
+        <div class="grafico__caja">
+          <svg
+            viewBox={`0 0 ${A} ${AL}`}
+            class="grafico__svg"
+            id="grafico-corriente"
+            role="img"
+            aria-label={`Corriente de motor del Compresor 10 durante 24 horas. Mínimo ${Math.min(...valores)} amperes, máximo ${Math.max(...valores)} amperes, umbral configurado en ${UMBRAL} amperes.`}
+          >
+            <defs>
+              <linearGradient id="relleno" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#46C0D8" stop-opacity=".34" />
+                <stop offset="100%" stop-color="#46C0D8" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+
+            <!-- Grilla recesiva -->
+            {marcasY.map((v) => (
+              <>
+                <line x1={M.izquierda} y1={y(v)} x2={A - M.derecha} y2={y(v)} class="grilla" />
+                <text x={M.izquierda - 10} y={y(v) + 4} class="eje" text-anchor="end">{v}</text>
+              </>
+            ))}
+            {marcasX.map((i) => (
+              <text x={x(i)} y={AL - 8} class="eje" text-anchor="middle">{serie[i].hora}</text>
+            ))}
+
+            <!-- Umbral: línea punteada con etiqueta, nunca solo color -->
+            <line x1={M.izquierda} y1={y(UMBRAL)} x2={A - M.derecha} y2={y(UMBRAL)} class="umbral" />
+            <text x={A - M.derecha + 6} y={y(UMBRAL) + 4} class="umbral__texto">Umbral</text>
+
+            <path d={area} fill="url(#relleno)" />
+            <path d={linea} class="serie" id="serie-corriente" />
+
+            <!-- Punto final con anillo de superficie -->
+            <circle cx={x(PUNTOS - 1)} cy={y(ultimo.valor)} r="5.5" class="punto-final" />
+
+            <!-- Capa de interacción -->
+            <line class="cruz oculto" id="cruz" x1="0" y1={M.arriba} x2="0" y2={M.arriba + alto} />
+            <circle class="foco oculto" id="foco" r="5" />
+            <rect
+              x={M.izquierda} y={M.arriba} width={ancho} height={alto}
+              fill="transparent" id="zona-hover" style="cursor:crosshair"
+            />
+          </svg>
+
+          <div class="globo" id="globo" hidden>
+            <span class="globo__hora"></span>
+            <span class="globo__valor"></span>
+          </div>
+        </div>
+
+        <details class="tabla">
+          <summary>Ver los datos en tabla</summary>
+          <div class="tabla__caja">
+            <table>
+              <caption class="solo-lectores">Corriente de motor del Compresor 10, cada 30 minutos</caption>
+              <thead><tr><th scope="col">Hora</th><th scope="col">Corriente (A)</th></tr></thead>
+              <tbody>
+                {serie.map((p) => (
+                  <tr><th scope="row">{p.hora}</th><td>{p.valor.toFixed(1)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </figure>
+
+      <!-- Variables -->
+      <div class="variables">
+        {variables.map((v) => (
+          <article class="variable">
+            <span class="variable__etiqueta">{v.etiqueta}</span>
+            <span class="variable__valor">
+              <b class="contador" data-hasta={v.valor} data-decimales={v.decimales}>0</b>
+              <i>{v.unidad}</i>
+            </span>
+            <svg viewBox="0 0 100 30" class="chispa" preserveAspectRatio="none" aria-hidden="true">
+              <path d={chispaD(v.chispa)} />
+            </svg>
+          </article>
+        ))}
+      </div>
+
+      <!-- Eventos -->
+      <ul class="eventos">
+        {eventos.map((e) => (
+          <li class={`evento evento--${e.estado}`}>
+            <span class="evento__icono" aria-hidden="true">{e.icono}</span>
+            <span class="evento__texto">{e.texto}</span>
+            <span class="evento__hora">{e.hora}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <p class="aclaracion revelar">
+      Datos de demostración. Las variables mostradas corresponden a los parámetros
+      que la plataforma captura de un variador de frecuencia.
+      {excedidos > 0 && ` En este turno hubo ${excedidos} lecturas sobre el umbral.`}
+    </p>
+  </div>
+</section>
+
+<script define:vars={{ serie, UMBRAL, M, ancho, alto, maximo, minimo, PUNTOS }}>
+  /* ---------- reloj ---------- */
+  const reloj = document.getElementById('panel-reloj');
+  const tic = () => {
+    reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
+  };
+  tic();
+  setInterval(tic, 1000);
+
+  /* ---------- dibujo progresivo de la serie ---------- */
+  const trazo = document.getElementById('serie-corriente');
+  if (trazo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const largo = trazo.getTotalLength();
+    trazo.style.strokeDasharray = String(largo);
+    trazo.style.strokeDashoffset = String(largo);
+    new IntersectionObserver((entradas, obs) => {
+      for (const e of entradas) {
+        if (!e.isIntersecting) continue;
+        trazo.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.3,.7,.3,1)';
+        trazo.style.strokeDashoffset = '0';
+        obs.disconnect();
+      }
+    }, { threshold: 0.3 }).observe(trazo);
+  }
+
+  /* ---------- contadores ---------- */
+  const contadores = document.querySelectorAll('.contador');
+  const animar = (el) => {
+    const hasta = parseFloat(el.dataset.hasta);
+    const dec = parseInt(el.dataset.decimales, 10);
+    const inicio = performance.now();
+    const paso = (ahora) => {
+      const t = Math.min(1, (ahora - inicio) / 1100);
+      const suave = 1 - Math.pow(1 - t, 3);
+      el.textContent = (hasta * suave).toFixed(dec);
+      if (t < 1) requestAnimationFrame(paso);
+    };
+    requestAnimationFrame(paso);
+  };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    contadores.forEach((el) => {
+      el.textContent = parseFloat(el.dataset.hasta).toFixed(parseInt(el.dataset.decimales, 10));
+    });
+  } else {
+    const obsC = new IntersectionObserver((entradas) => {
+      for (const e of entradas) {
+        if (!e.isIntersecting) continue;
+        animar(e.target);
+        obsC.unobserve(e.target);
+      }
+    }, { threshold: 0.4 });
+    contadores.forEach((el) => obsC.observe(el));
+  }
+
+  /* ---------- cruz y globo ---------- */
+  const svg = document.getElementById('grafico-corriente');
+  const zona = document.getElementById('zona-hover');
+  const cruz = document.getElementById('cruz');
+  const foco = document.getElementById('foco');
+  const globo = document.getElementById('globo');
+  const caja = globo.parentElement;
+
+  const posX = (i) => M.izquierda + (i / (PUNTOS - 1)) * ancho;
+  const posY = (v) => M.arriba + alto - ((v - minimo) / (maximo - minimo)) * alto;
+
+  function mover(ev) {
+    const r = svg.getBoundingClientRect();
+    const sx = ((ev.clientX - r.left) / r.width) * svg.viewBox.baseVal.width;
+    const i = Math.max(0, Math.min(PUNTOS - 1, Math.round(((sx - M.izquierda) / ancho) * (PUNTOS - 1))));
+    const p = serie[i];
+
+    cruz.setAttribute('x1', posX(i)); cruz.setAttribute('x2', posX(i));
+    cruz.classList.remove('oculto');
+    foco.setAttribute('cx', posX(i)); foco.setAttribute('cy', posY(p.valor));
+    foco.classList.remove('oculto');
+
+    const rc = caja.getBoundingClientRect();
+    globo.hidden = false;
+    globo.querySelector('.globo__hora').textContent = p.hora;
+    globo.querySelector('.globo__valor').textContent = `${p.valor.toFixed(1)} A`;
+    globo.classList.toggle('globo--alto', p.valor > UMBRAL);
+    const gx = (posX(i) / svg.viewBox.baseVal.width) * rc.width;
+    globo.style.left = `${Math.min(Math.max(gx, 60), rc.width - 60)}px`;
+    globo.style.top = `${(posY(p.valor) / svg.viewBox.baseVal.height) * rc.height - 16}px`;
+  }
+
+  function salir() {
+    cruz.classList.add('oculto');
+    foco.classList.add('oculto');
+    globo.hidden = true;
+  }
+
+  zona.addEventListener('pointermove', mover);
+  zona.addEventListener('pointerleave', salir);
+  zona.addEventListener('pointerdown', mover);
+</script>
+
+<style>
+  .panel-seccion { background: var(--nx-noche); color: #dbe4f5; padding: clamp(64px, 9vw, 112px) 0; }
+  .panel-seccion :global(h2) { color: #fff; }
+  .panel-seccion :global(.bajada) { color: #a9b6d4; }
+  .panel-seccion :global(.grad) {
+    background: linear-gradient(100deg, #9edcf2, #46C0D8 50%, #7fb6ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .panel {
+    background: var(--nx-noche-2);
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 40px 90px -40px rgba(0, 0, 0, .9);
+  }
+
+  /* barra */
+  .panel__barra {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px;
+    padding: 18px 22px; border-bottom: 1px solid rgba(255, 255, 255, .08);
+    background: rgba(255, 255, 255, .02);
+  }
+  .panel__equipo { display: flex; align-items: center; gap: 13px; }
+  .panel__equipo strong { display: block; color: #fff; font-size: 15.5px; }
+  .panel__equipo span { font-size: 13px; color: #7c89ab; }
+  .panel__punto {
+    width: 10px; height: 10px; border-radius: 50%; background: #46C0D8; flex: none;
+    box-shadow: 0 0 0 0 rgba(70, 192, 216, .6);
+    animation: latir 2.4s cubic-bezier(.2, .7, .3, 1) infinite;
+  }
+  @keyframes latir { 70% { box-shadow: 0 0 0 9px rgba(70, 192, 216, 0); } 100% { box-shadow: 0 0 0 0 rgba(70, 192, 216, 0); } }
+
+  .panel__estado { display: flex; align-items: center; gap: 14px; }
+  .panel__reloj { font-size: 13px; color: #7c89ab; font-variant-numeric: tabular-nums; }
+  .insignia {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; font-weight: 650; padding: 5px 12px; border-radius: 999px;
+  }
+  .insignia i { font-style: normal; font-size: 9px; }
+  .insignia--good { color: #6ee36e; background: rgba(12, 163, 12, .16); }
+
+  /* gráfico */
+  .grafico { padding: 22px 22px 6px; }
+  .grafico__titulo {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+    font-size: 14px; font-weight: 600; color: #cbd6ee;
+  }
+  .grafico__ultimo { font-size: 13px; color: #7c89ab; font-weight: 500; }
+  .grafico__ultimo b { color: #9edcf2; font-size: 17px; font-variant-numeric: tabular-nums; }
+
+  .grafico__caja { position: relative; }
+  .grafico__svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .grilla { stroke: rgba(255, 255, 255, .07); stroke-width: 1; }
+  .eje { fill: #6a779a; font-size: 11px; font-family: inherit; }
+  .umbral { stroke: #fab219; stroke-width: 1.5; stroke-dasharray: 5 5; opacity: .75; }
+  .umbral__texto { fill: #fab219; font-size: 10.5px; font-weight: 600; font-family: inherit; }
+
+  .serie { fill: none; stroke: #46C0D8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .punto-final { fill: #46C0D8; stroke: var(--nx-noche-2); stroke-width: 2; }
+
+  .oculto { visibility: hidden; }
+  .cruz { stroke: rgba(255, 255, 255, .28); stroke-width: 1; stroke-dasharray: 3 3; }
+  .foco { fill: #9edcf2; stroke: var(--nx-noche-2); stroke-width: 2; }
+
+  .globo {
+    position: absolute; transform: translate(-50%, -100%);
+    background: #050a1f; border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 9px; padding: 7px 12px; pointer-events: none;
+    display: flex; flex-direction: column; gap: 1px; white-space: nowrap;
+    box-shadow: 0 10px 26px -10px rgba(0, 0, 0, .9);
+  }
+  .globo__hora { font-size: 11px; color: #7c89ab; }
+  .globo__valor { font-size: 14.5px; font-weight: 700; color: #9edcf2; font-variant-numeric: tabular-nums; }
+  .globo--alto .globo__valor { color: #fab219; }
+
+  /* tabla accesible */
+  .tabla { margin-top: 10px; }
+  .tabla summary {
+    cursor: pointer; font-size: 13px; color: #7c89ab; padding: 8px 0;
+    list-style-position: inside;
+  }
+  .tabla summary:hover { color: #9edcf2; }
+  .tabla__caja { max-height: 240px; overflow: auto; margin-bottom: 10px; }
+  .tabla table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tabla th, .tabla td { text-align: left; padding: 6px 10px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+  .tabla thead th { position: sticky; top: 0; background: var(--nx-noche-2); color: #cbd6ee; }
+  .tabla tbody th { font-weight: 500; color: #7c89ab; }
+  .tabla td { color: #9edcf2; font-variant-numeric: tabular-nums; }
+
+  /* variables */
+  .variables {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
+    border-top: 1px solid rgba(255, 255, 255, .08);
+  }
+  .variable {
+    padding: 18px 20px; border-right: 1px solid rgba(255, 255, 255, .06);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .variable:last-child { border-right: none; }
+  .variable__etiqueta { font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: #6a779a; font-weight: 650; }
+  .variable__valor { display: flex; align-items: baseline; gap: 5px; }
+  .variable__valor b { font-size: 25px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .variable__valor i { font-style: normal; font-size: 13px; color: #7c89ab; }
+  .chispa { width: 100%; height: 30px; margin-top: 2px; }
+  .chispa path { fill: none; stroke: #46C0D8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+
+  /* eventos */
+  .eventos { list-style: none; border-top: 1px solid rgba(255, 255, 255, .08); }
+  .evento {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 22px; font-size: 14px; color: #a9b6d4;
+    border-bottom: 1px solid rgba(255, 255, 255, .05);
+  }
+  .evento:last-child { border-bottom: none; }
+  .evento__icono {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  }
+  .evento--good .evento__icono { background: rgba(12, 163, 12, .18); color: #6ee36e; }
+  .evento--warning .evento__icono { background: rgba(250, 178, 25, .18); color: #fab219; }
+  .evento__texto { flex: 1; min-width: 0; }
+  .evento__hora { font-size: 12.5px; color: #6a779a; white-space: nowrap; }
+
+  .aclaracion { margin-top: 20px; font-size: 13px; color: #6a779a; text-align: center; }
+
+  @media (max-width: 620px) {
+    .grafico { padding: 18px 14px 6px; }
+    .variable { padding: 14px 16px; }
+    .evento { padding: 12px 16px; font-size: 13.5px; }
+    .evento__hora { display: none; }
+  }
+</style>

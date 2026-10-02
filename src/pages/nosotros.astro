@@ -2,8 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 
-// TODO (revisar con el equipo): cargos, descripciones y cifras de esta página
-// son un borrador. Ajustar antes de difundir el sitio.
+// Estructura tomada del documento interno "Estructura organizacional Nexoria"
+// (septiembre 2026). Los textos de "En qué creemos" siguen siendo borrador.
+
 const valores = [
   {
     t: 'Cercanía con la planta',
@@ -24,8 +25,36 @@ const valores = [
 ];
 
 const equipo = [
-  { nombre: 'Moisés Rubilar', cargo: 'Cofundador · Desarrollo y plataforma' },
-  { nombre: 'Eduardo Albornoz', cargo: 'Cofundador · Operaciones e implementación' },
+  {
+    nombre: 'Christian Muñoz',
+    cargo: 'CEO · Dirección ejecutiva',
+    area: 'Estrategia y negocio',
+    detalle: 'Estrategia general, modelo de negocio, alianzas y financiamiento.',
+  },
+  {
+    nombre: 'Miguel Contreras',
+    cargo: 'COO · Operaciones',
+    area: 'Operaciones y administración',
+    detalle: 'Coordina al equipo y los proyectos, y lleva marketing y comunicaciones.',
+  },
+  {
+    nombre: 'Fabricio Sánchez',
+    cargo: 'CTO · Tecnología',
+    area: 'Producto e innovación',
+    detalle: 'Define la arquitectura y los estándares técnicos; lidera I+D y validación industrial.',
+  },
+  {
+    nombre: 'Eduardo Albornoz',
+    cargo: 'Comercial e integración',
+    area: 'Clientes y terreno',
+    detalle: 'Levanta necesidades, lidera la implementación en planta y la relación técnica con el cliente.',
+  },
+  {
+    nombre: 'Moisés Rubilar',
+    cargo: 'Software y plataforma',
+    area: 'Desarrollo e infraestructura',
+    detalle: 'Desarrolla y mantiene la plataforma, los servidores y los datos; monitoreo y continuidad.',
+  },
 ];
 ---
 
@@ -96,7 +125,9 @@ const equipo = [
           <article class="tarjeta persona revelar">
             <span class="persona__inicial">{p.nombre.charAt(0)}</span>
             <h3>{p.nombre}</h3>
-            <p>{p.cargo}</p>
+            <p class="persona__cargo">{p.cargo}</p>
+            <span class="persona__area">{p.area}</span>
+            <p class="persona__detalle">{p.detalle}</p>
           </article>
         ))}
       </div>
@@ -128,6 +159,13 @@ const equipo = [
     background: var(--nx-degradado); color: #fff;
     font-size: 26px; font-weight: 700;
   }
+  .persona__cargo { font-weight: 600; color: var(--nx-azul) !important; margin-top: 8px !important; }
+  .persona__area {
+    display: inline-block; margin-top: 10px; padding: 4px 11px; border-radius: 999px;
+    background: var(--fondo-3); color: var(--texto-2);
+    font-size: 11.5px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase;
+  }
+  .persona__detalle { font-size: 14.5px; }
 
   @media (max-width: 860px) { .relato { grid-template-columns: 1fr; gap: 20px; } }
 </style>
