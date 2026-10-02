@@ -1,83 +1,132 @@
 ---
 /**
- * Franja superior: logo a la izquierda y lecturas vivas al centro, como la
- * barra de estado de una sala de control. No es un menú — la navegación va
- * en el dock inferior.
+ * Barra superior en módulos, al estilo de una barra de estado de escritorio:
+ * pastillas separadas en vez de una franja continua. No es un menú — la
+ * navegación va en el dock inferior.
  */
 const lecturas = [
-  ['Nodos', '248', ''],
-  ['Ingesta', '1.2k', '/min'],
-  ['Latencia', '38', 'ms'],
-  ['Alarmas', '0', ''],
+  { k: 'Nodos', v: '248', u: '' },
+  { k: 'Ingesta', v: '1.2k', u: '/min' },
+  { k: 'Latencia', v: '38', u: 'ms' },
 ];
 ---
 
 <header class="bs">
-  <a href="/" class="bs__marca" aria-label="Nexoria — inicio">
-    <img src="/marca/svg/nexoria-horizontal-oscuro.svg" alt="Nexoria" width="126" height="28" />
+  <!-- Módulo: marca -->
+  <a href="/" class="mod mod--marca" aria-label="Nexoria — inicio">
+    <img src="/marca/svg/nexoria-horizontal-oscuro.svg" alt="Nexoria" width="112" height="25" />
   </a>
 
-  <div class="bs__centro" aria-hidden="true">
-    <span class="bs__sistema">
-      <i class="bs__led"></i>
-      Sistema operativo
+  <div class="bs__centro">
+    <!-- Módulo: estado del sistema -->
+    <span class="mod mod--estado" aria-hidden="true">
+      <i class="mod__led"></i>
+      <span class="mod__txt">Sistema operativo</span>
     </span>
-    <span class="bs__sep"></span>
-    {lecturas.map(([k, v, u]) => (
-      <span class="bs__lectura">
-        <em>{k}</em>
-        <b data-base={v}>{v}</b>{u}
-      </span>
-    ))}
+
+    <!-- Módulo: lecturas -->
+    <span class="mod mod--lecturas" aria-hidden="true">
+      {lecturas.map((l, i) => (
+        <>
+          {i > 0 && <i class="mod__div"></i>}
+          <span class="lec">
+            <em>{l.k}</em>
+            <b data-base={l.v}>{l.v}</b>{l.u && <u>{l.u}</u>}
+          </span>
+        </>
+      ))}
+    </span>
+
+    <!-- Módulo: alarmas -->
+    <span class="mod mod--alarmas" aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 14.5 18 8.5Z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+      <span class="mod__txt">Alarmas</span>
+      <b>0</b>
+    </span>
   </div>
 
-  <div class="bs__der" aria-hidden="true">
-    <span class="bs__reloj" id="bs-reloj">--:--:--</span>
-  </div>
+  <!-- Módulo: reloj -->
+  <span class="mod mod--reloj" aria-hidden="true">
+    <i class="mod__punto"></i>
+    <b id="bs-reloj">--:--:--</b>
+  </span>
 </header>
 
 <style>
   .bs {
     position: fixed; inset: 0 0 auto 0; z-index: 70;
     height: var(--bs-alto);
-    display: flex; align-items: center; gap: 22px;
-    padding: 0 18px;
-    background: rgba(5, 9, 24, .9);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(110, 170, 235, .15);
-    font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
-    color: #6a779a; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 12px;
+    /* La barra no pinta fondo: lo ponen las pastillas */
+    background: linear-gradient(180deg, rgba(5, 9, 24, .92), rgba(5, 9, 24, .62) 70%, transparent);
+    backdrop-filter: blur(10px);
+    font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; font-weight: 650;
+    pointer-events: none;
   }
 
-  .bs__marca { flex: none; display: flex; align-items: center; }
-  .bs__marca img { height: 25px; width: auto; transition: opacity .2s ease; }
-  .bs__marca:hover img { opacity: .82; }
+  /* ---- Módulo base: la pastilla ---- */
+  .mod {
+    pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 9px;
+    height: 30px; padding: 0 13px;
+    border-radius: 9px;
+    background: rgba(17, 26, 66, .72);
+    border: 1px solid rgba(110, 170, 235, .16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 6px 16px -10px rgba(0, 0, 0, .9);
+    color: #8ea0c4; white-space: nowrap;
+    transition: border-color .22s ease, background .22s ease, transform .22s ease;
+  }
+  .mod:hover { border-color: rgba(70, 192, 216, .4); background: rgba(22, 34, 82, .82); }
 
-  .bs__centro { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; overflow: hidden; }
-  .bs__sistema { display: inline-flex; align-items: center; gap: 8px; color: #8ea0c4; white-space: nowrap; }
-  .bs__led {
+  .mod__div { width: 1px; height: 13px; background: rgba(110, 170, 235, .22); flex: none; }
+  .mod__txt { color: #8ea0c4; }
+
+  /* ---- Marca ---- */
+  .mod--marca { flex: none; padding: 0 14px; }
+  .mod--marca img { height: 17px; width: auto; transition: opacity .2s ease; }
+  .mod--marca:hover { transform: translateY(-1px); }
+  .mod--marca:hover img { opacity: .85; }
+
+  .bs__centro { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
+
+  /* ---- Estado ---- */
+  .mod--estado { color: #9edcf2; }
+  .mod__led {
     width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex: none;
     box-shadow: 0 0 0 0 rgba(34, 197, 94, .7);
     animation: bs-latir 2.6s cubic-bezier(.2, .7, .3, 1) infinite;
   }
   @keyframes bs-latir { 70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
-  .bs__sep { width: 1px; height: 14px; background: rgba(110, 170, 235, .2); flex: none; }
+  /* ---- Lecturas ---- */
+  .mod--lecturas { gap: 11px; }
+  .lec { display: inline-flex; align-items: baseline; gap: 5px; }
+  .lec em { font-style: normal; color: #5d6a8c; }
+  .lec b { color: var(--nx-cian); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .lec u { text-decoration: none; color: #5d6a8c; }
 
-  .bs__lectura { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
-  .bs__lectura em { font-style: normal; color: #4e5a78; }
-  .bs__lectura b { color: var(--nx-cian); font-variant-numeric: tabular-nums; font-weight: 700; }
+  /* ---- Alarmas: en verde mientras esté en cero ---- */
+  .mod--alarmas { color: #6ee36e; border-color: rgba(34, 197, 94, .28); background: rgba(12, 163, 12, .12); }
+  .mod--alarmas:hover { border-color: rgba(34, 197, 94, .5); background: rgba(12, 163, 12, .18); }
+  .mod--alarmas .mod__txt { color: #6ee36e; }
+  .mod--alarmas b { color: #fff; font-variant-numeric: tabular-nums; }
 
-  .bs__der { flex: none; }
-  .bs__reloj { color: #8ea0c4; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+  /* ---- Reloj ---- */
+  .mod--reloj { flex: none; }
+  .mod--reloj b { color: #cbd6ee; font-variant-numeric: tabular-nums; letter-spacing: .06em; font-weight: 650; }
+  .mod__punto { width: 4px; height: 4px; border-radius: 50%; background: var(--nx-cian); flex: none; opacity: .8; }
 
-  @media (max-width: 1080px) { .bs__lectura:nth-of-type(n+3) { display: none; } }
-  @media (max-width: 760px) {
-    .bs { gap: 14px; padding: 0 14px; }
-    .bs__lectura, .bs__sep { display: none; }
-    .bs__centro { justify-content: flex-end; }
+  @media (max-width: 1180px) { .mod--lecturas .lec:nth-child(n+5) { display: none; } }
+  @media (max-width: 980px) { .mod--lecturas { display: none; } }
+  @media (max-width: 720px) {
+    .bs { gap: 7px; padding: 0 9px; }
+    .mod { height: 28px; padding: 0 10px; gap: 7px; }
+    .mod--estado .mod__txt, .mod--alarmas .mod__txt { display: none; }
   }
-  @media (max-width: 420px) { .bs__sistema span, .bs__reloj { display: none; } }
+  @media (max-width: 420px) { .mod--alarmas { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) { .mod__led { animation: none; } }
 </style>
 
 <script>
@@ -95,7 +144,8 @@ const lecturas = [
     }
 
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const vals = document.querySelectorAll<HTMLElement>('.bs__lectura b[data-base]');
+      const vals = document.querySelectorAll<HTMLElement>('.lec b[data-base]');
+      if (!vals.length) return;
       setInterval(() => {
         vals.forEach((el) => {
           const txt = el.dataset.base ?? '';

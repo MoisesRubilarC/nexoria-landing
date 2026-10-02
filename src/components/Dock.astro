@@ -15,7 +15,7 @@ const items = [
 ---
 
 <nav class="dock" id="dock" aria-label="Principal">
-  <div class="dock__caja">
+  <div class="dock__grupo">
     <span class="dock__resalte" id="dock-resalte" aria-hidden="true"></span>
 
     {items.map((i) => (
@@ -27,8 +27,9 @@ const items = [
       </a>
     ))}
 
-    <span class="dock__div" aria-hidden="true"></span>
+  </div>
 
+  <div class="dock__grupo dock__grupo--cta">
     <a href="/contacto/" class:list={['dock__cta', { 'es-activo': activo('/contacto/') }]}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
       <span>Cotizar</span>
@@ -41,25 +42,28 @@ const items = [
     position: fixed; z-index: 72;
     left: 50%; bottom: 20px; translate: -50% 0;
     max-width: calc(100vw - 24px);
+    display: flex; align-items: center; gap: 10px;
   }
 
-  .dock__caja {
+  /* Cada grupo es un módulo propio, separado del de al lado */
+  .dock__grupo {
     position: relative;
     display: flex; align-items: center; gap: 3px;
-    padding: 7px;
-    border-radius: 999px;
-    background: rgba(9, 15, 36, .82);
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(17, 26, 66, .8);
     backdrop-filter: blur(18px) saturate(160%);
-    border: 1px solid rgba(110, 170, 235, .22);
+    border: 1px solid rgba(110, 170, 235, .2);
     box-shadow:
       0 22px 50px -18px rgba(0, 0, 0, .95),
-      inset 0 1px 0 rgba(255, 255, 255, .07);
+      inset 0 1px 0 rgba(255, 255, 255, .06);
   }
+  .dock__grupo--cta { padding: 6px; }
 
   /* Pastilla que se desliza bajo el ítem activo */
   .dock__resalte {
-    position: absolute; top: 7px; bottom: 7px; left: 0; width: 0;
-    border-radius: 999px;
+    position: absolute; top: 6px; bottom: 6px; left: 0; width: 0;
+    border-radius: 10px;
     background: linear-gradient(140deg, rgba(70, 192, 216, .22), rgba(45, 102, 171, .3));
     border: 1px solid rgba(70, 192, 216, .4);
     opacity: 0;
@@ -72,7 +76,7 @@ const items = [
   .dock__item {
     position: relative; z-index: 1;
     display: flex; align-items: center; gap: 8px;
-    padding: 10px 15px; border-radius: 999px;
+    padding: 9px 14px; border-radius: 10px;
     color: #8696ba; white-space: nowrap;
     font-size: 13.5px; font-weight: 600;
     transition: color .22s ease;
@@ -83,12 +87,10 @@ const items = [
   .dock__icono { display: grid; place-items: center; flex: none; transition: color .22s ease, transform .3s ease; }
   .dock__item:hover .dock__icono { transform: translateY(-2px); }
 
-  .dock__div { width: 1px; height: 22px; margin: 0 5px; background: rgba(110, 170, 235, .22); flex: none; }
-
   .dock__cta {
     position: relative; z-index: 1;
     display: flex; align-items: center; gap: 8px;
-    padding: 10px 18px; border-radius: 999px;
+    padding: 9px 17px; border-radius: 10px;
     color: #04121c; background: var(--nx-degradado); background-size: 160% 100%;
     font-size: 13.5px; font-weight: 700; white-space: nowrap;
     box-shadow: 0 8px 22px -10px rgba(45, 102, 171, .95);
@@ -100,14 +102,14 @@ const items = [
   }
 
   @media (max-width: 720px) {
-    .dock { bottom: 12px; width: calc(100vw - 20px); }
-    .dock__caja { justify-content: space-between; padding: 6px; gap: 0; }
-    .dock__item { flex-direction: column; gap: 3px; padding: 7px 8px; font-size: 10px; flex: 1; }
+    .dock { bottom: 10px; width: calc(100vw - 16px); gap: 7px; }
+    .dock__grupo { flex: 1; justify-content: space-between; padding: 5px; gap: 0; }
+    .dock__grupo--cta { flex: none; }
+    .dock__item { flex-direction: column; gap: 3px; padding: 7px 6px; font-size: 10px; flex: 1; }
     .dock__texto { font-size: 10px; }
-    .dock__div { display: none; }
     .dock__cta { flex-direction: column; gap: 3px; padding: 7px 12px; font-size: 10px; }
     .dock__cta svg { width: 15px; height: 15px; }
-    .dock__resalte { top: 6px; bottom: 6px; }
+    .dock__resalte { top: 5px; bottom: 5px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -119,7 +121,7 @@ const items = [
   let recolocar: (() => void) | null = null;
 
 function montarDock() {
-    const caja = document.querySelector<HTMLElement>('.dock__caja');
+    const caja = document.querySelector<HTMLElement>('.dock__grupo');
     const resalte = document.getElementById('dock-resalte');
     if (!caja || !resalte) return;
 
