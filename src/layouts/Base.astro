@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-import BarraEstado from '../components/BarraEstado.astro';
-import Riel from '../components/Riel.astro';
+import BarraSistema from '../components/BarraSistema.astro';
+import Dock from '../components/Dock.astro';
 import PieDePagina from '../components/PieDePagina.astro';
 import { ClientRouter } from 'astro:transitions';
 
@@ -59,8 +59,8 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
 <body>
   <a href="#principal" class="saltar">Saltar al contenido</a>
 
-  <BarraEstado transition:persist />
-  <Riel transition:animate="none" />
+  <BarraSistema transition:persist />
+  <Dock transition:animate="none" />
 
   <!-- Indicador de avance, a la derecha, como una columna de nivel -->
   <div class="avance" aria-hidden="true"><span id="avance-barra"></span></div>
@@ -75,36 +75,34 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
 
   <style is:global>
     :root {
-      --barra-alto: 34px;
-      --riel-ancho: 68px;
-      --riel-abierto: 206px;
-      --riel-movil: 60px;
+      --bs-alto: 46px;
+      --dock-alto: 92px;
     }
 
     .consola {
-      margin-left: var(--riel-ancho);
-      padding-bottom: var(--barra-alto);
+      padding-top: var(--bs-alto);
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
     }
     .consola > main { flex: 1; }
 
-    @media (max-width: 900px) {
-      .consola { margin-left: 0; padding-bottom: calc(var(--riel-movil) + var(--barra-alto)); }
-    }
+    /* Aire al final para que el dock no tape el pie de página */
+    .consola > :global(footer) { padding-bottom: var(--dock-alto); }
+
+    @media (max-width: 720px) { :root { --dock-alto: 84px; } }
 
     .saltar {
       position: absolute; left: 12px; top: -60px; z-index: 100;
       background: var(--nx-cian); color: #04121c; padding: 10px 18px;
       border-radius: 0 0 10px 10px; font-weight: 700; transition: top .2s ease;
     }
-    .saltar:focus { top: 0; }
+    .saltar:focus { top: var(--bs-alto); }
 
     /* El riel, la barra y el avance se capturan por separado: al tener nombre
        propio quedan fuera de la animación de la raíz y no se mueven al navegar. */
-    .riel   { view-transition-name: nx-riel; }
-    .barra  { view-transition-name: nx-barra; }
+    .bs     { view-transition-name: nx-barra; }
+    .dock   { view-transition-name: nx-dock; }
     .avance { view-transition-name: nx-avance; }
     .barrido { view-transition-name: nx-barrido; }
 
@@ -128,22 +126,21 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
 
     /* Barrido de carga sobre el riel */
     .barrido {
-      position: fixed; z-index: 68; left: 0; top: 0; bottom: var(--barra-alto);
-      width: var(--riel-ancho); pointer-events: none; overflow: hidden;
-      opacity: 0;
+      position: fixed; z-index: 71; inset-inline: 0; top: var(--bs-alto);
+      height: 2px; pointer-events: none; overflow: hidden; opacity: 0;
     }
     .barrido::after {
-      content: ''; position: absolute; inset-inline: 0; height: 38%;
-      background: linear-gradient(180deg, transparent, rgba(70, 192, 216, .45), transparent);
-      transform: translateY(-120%);
+      content: ''; position: absolute; inset-block: 0; width: 34%;
+      background: linear-gradient(90deg, transparent, var(--nx-cian), transparent);
+      box-shadow: 0 0 14px rgba(70, 192, 216, .9);
+      transform: translateX(-120%);
     }
     .barrido.activo { opacity: 1; }
-    .barrido.activo::after { animation: nx-barrer .62s cubic-bezier(.4, 0, .3, 1); }
+    .barrido.activo::after { animation: nx-barrer .7s cubic-bezier(.4, 0, .25, 1); }
     @keyframes nx-barrer {
-      from { transform: translateY(-120%); }
-      to { transform: translateY(320%); }
+      from { transform: translateX(-120%); }
+      to { transform: translateX(400%); }
     }
-    @media (max-width: 900px) { .barrido { display: none; } }
 
     @media (prefers-reduced-motion: reduce) {
       ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
@@ -223,6 +220,19 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
             scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
           });
         });
+      }
+
+      // Entrada de la portada: encadenada, no todo de golpe
+      const hero = document.querySelector('.hp');
+      if (hero && !reducido) {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        tl.from('.hp__insignia', { y: 16, opacity: 0, duration: .55 })
+          .from('.hp h1', { y: 26, opacity: 0, duration: .75 }, '-=.32')
+          .from('.hp__bajada', { y: 20, opacity: 0, duration: .65 }, '-=.48')
+          .from('.hp__acciones > *', { y: 16, opacity: 0, duration: .5, stagger: .09 }, '-=.42')
+          .from('.hp__sellos li', { y: 12, opacity: 0, duration: .45, stagger: .07 }, '-=.34')
+          .from('.hp__producto', { x: 44, opacity: 0, duration: .95 }, '-=1.05')
+          .from('.hp__etiqueta', { y: -10, opacity: 0, duration: .4 }, '-=.3');
       }
 
       ScrollTrigger.refresh();

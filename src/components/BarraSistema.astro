@@ -1,0 +1,115 @@
+---
+/**
+ * Franja superior: logo a la izquierda y lecturas vivas al centro, como la
+ * barra de estado de una sala de control. No es un menú — la navegación va
+ * en el dock inferior.
+ */
+const lecturas = [
+  ['Nodos', '248', ''],
+  ['Ingesta', '1.2k', '/min'],
+  ['Latencia', '38', 'ms'],
+  ['Alarmas', '0', ''],
+];
+---
+
+<header class="bs">
+  <a href="/" class="bs__marca" aria-label="Nexoria — inicio">
+    <img src="/marca/svg/nexoria-horizontal-oscuro.svg" alt="Nexoria" width="126" height="28" />
+  </a>
+
+  <div class="bs__centro" aria-hidden="true">
+    <span class="bs__sistema">
+      <i class="bs__led"></i>
+      Sistema operativo
+    </span>
+    <span class="bs__sep"></span>
+    {lecturas.map(([k, v, u]) => (
+      <span class="bs__lectura">
+        <em>{k}</em>
+        <b data-base={v}>{v}</b>{u}
+      </span>
+    ))}
+  </div>
+
+  <div class="bs__der" aria-hidden="true">
+    <span class="bs__reloj" id="bs-reloj">--:--:--</span>
+  </div>
+</header>
+
+<style>
+  .bs {
+    position: fixed; inset: 0 0 auto 0; z-index: 70;
+    height: var(--bs-alto);
+    display: flex; align-items: center; gap: 22px;
+    padding: 0 18px;
+    background: rgba(5, 9, 24, .9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(110, 170, 235, .15);
+    font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: #6a779a; font-weight: 600;
+  }
+
+  .bs__marca { flex: none; display: flex; align-items: center; }
+  .bs__marca img { height: 25px; width: auto; transition: opacity .2s ease; }
+  .bs__marca:hover img { opacity: .82; }
+
+  .bs__centro { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; overflow: hidden; }
+  .bs__sistema { display: inline-flex; align-items: center; gap: 8px; color: #8ea0c4; white-space: nowrap; }
+  .bs__led {
+    width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex: none;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, .7);
+    animation: bs-latir 2.6s cubic-bezier(.2, .7, .3, 1) infinite;
+  }
+  @keyframes bs-latir { 70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+  .bs__sep { width: 1px; height: 14px; background: rgba(110, 170, 235, .2); flex: none; }
+
+  .bs__lectura { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+  .bs__lectura em { font-style: normal; color: #4e5a78; }
+  .bs__lectura b { color: var(--nx-cian); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+  .bs__der { flex: none; }
+  .bs__reloj { color: #8ea0c4; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+
+  @media (max-width: 1080px) { .bs__lectura:nth-of-type(n+3) { display: none; } }
+  @media (max-width: 760px) {
+    .bs { gap: 14px; padding: 0 14px; }
+    .bs__lectura, .bs__sep { display: none; }
+    .bs__centro { justify-content: flex-end; }
+  }
+  @media (max-width: 420px) { .bs__sistema span, .bs__reloj { display: none; } }
+</style>
+
+<script>
+  let montado = false;
+
+  function montarBarra() {
+    if (montado) return;
+    montado = true;
+
+    const reloj = document.getElementById('bs-reloj');
+    if (reloj) {
+      const tic = () => { reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false }); };
+      tic();
+      setInterval(tic, 1000);
+    }
+
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const vals = document.querySelectorAll<HTMLElement>('.bs__lectura b[data-base]');
+      setInterval(() => {
+        vals.forEach((el) => {
+          const txt = el.dataset.base ?? '';
+          if (txt.includes('k')) {
+            el.textContent = (1.2 + (Math.random() - 0.5) * 0.18).toFixed(1) + 'k';
+          } else {
+            const base = parseFloat(txt);
+            if (!Number.isFinite(base) || base === 0) return;
+            el.textContent = String(Math.max(0, Math.round(base + (Math.random() - 0.5) * base * 0.09)));
+          }
+        });
+      }, 2200);
+    }
+  }
+
+  document.addEventListener('astro:page-load', montarBarra);
+</script>
