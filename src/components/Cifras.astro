@@ -43,7 +43,11 @@ const cifras = [
 </style>
 
 <script>
+let obsCifras: IntersectionObserver | null = null;
+
 function montarCifras() {
+  obsCifras?.disconnect();
+
 
     const cuentas = document.querySelectorAll<HTMLElement>('.contador-cifra');
     const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -66,10 +70,12 @@ function montarCifras() {
           obs.unobserve(el);
         }
       }, { threshold: 0.5 });
+      obsCifras = obs;
       cuentas.forEach((el) => obs.observe(el));
     }
 
 }
 
+document.addEventListener('astro:before-swap', () => obsCifras?.disconnect());
 document.addEventListener('astro:page-load', montarCifras);
 </script>

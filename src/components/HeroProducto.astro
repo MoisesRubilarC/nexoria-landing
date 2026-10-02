@@ -149,7 +149,12 @@ import VistaProducto from './VistaProducto.astro';
 </style>
 
 <script>
+let cortarRed: (() => void) | null = null;
+
 function montarHeroRed() {
+  cortarRed?.();
+  cortarRed = null;
+
 
     // Red de sensores, sutil: acompaña la foto sin taparla.
     const lienzo = document.getElementById('hp-red') as HTMLCanvasElement | null;
@@ -213,5 +218,6 @@ function montarHeroRed() {
 
 }
 
+document.addEventListener('astro:before-swap', () => { cortarRed?.(); cortarRed = null; });
 document.addEventListener('astro:page-load', montarHeroRed);
 </script>

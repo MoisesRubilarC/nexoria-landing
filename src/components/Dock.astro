@@ -116,7 +116,9 @@ const items = [
 </style>
 
 <script>
-  function montarDock() {
+  let recolocar: (() => void) | null = null;
+
+function montarDock() {
     const caja = document.querySelector<HTMLElement>('.dock__caja');
     const resalte = document.getElementById('dock-resalte');
     if (!caja || !resalte) return;
@@ -141,8 +143,11 @@ const items = [
       item.addEventListener('pointerenter', () => colocar(item, true));
     });
     caja.addEventListener('pointerleave', () => colocar(actual(), true));
-    addEventListener('resize', () => colocar(actual(), true), { passive: true });
+    recolocar = () => colocar(actual(), true);
   }
 
-  document.addEventListener('astro:page-load', montarDock);
+  // El listener de ventana se registra una vez; apunta siempre al dock vigente.
+addEventListener('resize', () => recolocar?.(), { passive: true });
+
+document.addEventListener('astro:page-load', montarDock);
 </script>

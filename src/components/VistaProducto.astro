@@ -301,7 +301,12 @@ const pestanas = ['Resumen', 'Tendencias', 'Alarmas', 'Eventos', 'Histórico'];
 </style>
 
 <script>
+let obsVistas: IntersectionObserver[] = [];
+
 function montarVista() {
+  obsVistas.forEach((o) => o.disconnect());
+  obsVistas = [];
+
 
     const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -338,10 +343,15 @@ function montarVista() {
           io.disconnect();
         }
       }, { threshold: 0.15 });
+      obsVistas.push(io);
       io.observe(vista);
     });
 
 }
 
+document.addEventListener('astro:before-swap', () => {
+  obsVistas.forEach((o) => o.disconnect());
+  obsVistas = [];
+});
 document.addEventListener('astro:page-load', montarVista);
 </script>

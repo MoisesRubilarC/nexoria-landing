@@ -229,7 +229,11 @@ const eventos = [
 </section>
 
 <script define:vars={{ serie, UMBRAL, M, ancho, alto, maximo, minimo, PUNTOS }}>
+let intervaloPanel = 0;
+
 function montarPanel() {
+  clearInterval(intervaloPanel);
+
 
     /* ---------- reloj ---------- */
     const reloj = document.getElementById('panel-reloj');
@@ -237,7 +241,7 @@ function montarPanel() {
       reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
     };
     tic();
-    setInterval(tic, 1000);
+    intervaloPanel = setInterval(tic, 1000);
 
     /* ---------- dibujo progresivo de la serie ---------- */
     const trazo = document.getElementById('serie-corriente');
@@ -328,6 +332,7 @@ function montarPanel() {
 
 }
 
+document.addEventListener('astro:before-swap', () => clearInterval(intervaloPanel));
 document.addEventListener('astro:page-load', montarPanel);
 </script>
 

@@ -129,57 +129,81 @@ const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden
 </style>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-function montarCarrusel() {
+gsap.registerPlugin(ScrollTrigger);
 
-    gsap.registerPlugin(ScrollTrigger);
+// Disparadores propios: se descartan y se rehacen al navegar o al cambiar
+// el ancho, porque el recorrido horizontal depende del tamaño de la ventana.
+let propios: ScrollTrigger[] = [];
 
-    const seccion = document.getElementById('carr');
-    const pista = document.getElementById('carr-pista');
-    const indice = document.getElementById('carr-indice');
-
-    // El desplazamiento horizontal solo tiene sentido en pantallas anchas;
-    // en móvil las tarjetas se apilan y no se fija nada.
-    const anchaYConMovimiento = () =>
-      window.innerWidth > 900 && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (seccion && pista && anchaYConMovimiento()) {
-      const recorrido = () => pista.scrollWidth - window.innerWidth + 48;
-
-      const tl = gsap.to(pista, {
-        x: () => -recorrido(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: seccion,
-          start: 'top top',
-          end: () => '+=' + recorrido(),
-          pin: true,
-          scrub: 0.6,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-        },
-      });
-
-      // Contador de la tarjeta que va pasando
-      if (indice) {
-        const tarjetas = pista.querySelectorAll<HTMLElement>('.carr__tarjeta');
-        tarjetas.forEach((t) => {
-          ScrollTrigger.create({
-            trigger: t,
-            containerAnimation: tl,
-            start: 'left 60%',
-            end: 'right 60%',
-            onToggle: ({ isActive }) => {
-              if (isActive) indice.textContent = String(t.dataset.indice).padStart(2, '0');
-            },
-          });
-        });
-      }
-    }
-
+function limpiar() {
+  propios.forEach((t) => t.kill());
+  propios = [];
 }
 
+function montarCarrusel() {
+  limpiar();
+
+  const seccion = document.getElementById('carr');
+  const pista = document.getElementById('carr-pista');
+  const indice = document.getElementById('carr-indice');
+  if (!seccion || !pista) return;
+
+  // El desplazamiento horizontal solo tiene sentido en pantallas anchas.
+  const aplica =
+    window.innerWidth > 900 && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!aplica) {
+    gsap.set(pista, { x: 0 });
+    return;
+  }
+
+  const recorrido = () => Math.max(0, pista.scrollWidth - window.innerWidth + 48);
+
+  const tl = gsap.to(pista, {
+    x: () => -recorrido(),
+    ease: 'none',
+    scrollTrigger: {
+      trigger: seccion,
+      start: 'top top',
+      end: () => '+=' + recorrido(),
+      pin: true,
+      scrub: 0.6,
+      invalidateOnRefresh: true,
+      anticipatePin: 1,
+    },
+  });
+  if (tl.scrollTrigger) propios.push(tl.scrollTrigger);
+
+  if (indice) {
+    pista.querySelectorAll<HTMLElement>('.carr__tarjeta').forEach((t) => {
+      propios.push(
+        ScrollTrigger.create({
+          trigger: t,
+          containerAnimation: tl,
+          start: 'left 60%',
+          end: 'right 60%',
+          onToggle: ({ isActive }) => {
+            if (isActive) indice.textContent = String(t.dataset.indice).padStart(2, '0');
+          },
+        })
+      );
+    });
+  }
+
+  ScrollTrigger.refresh();
+}
+
+// Al cruzar el umbral de 900 px hay que rehacerlo: de apilado a horizontal.
+let anchoPrevio = window.innerWidth;
+addEventListener('resize', () => {
+  const cruza = (anchoPrevio > 900) !== (window.innerWidth > 900);
+  anchoPrevio = window.innerWidth;
+  if (cruza) montarCarrusel();
+}, { passive: true });
+
+document.addEventListener('astro:before-swap', limpiar);
 document.addEventListener('astro:page-load', montarCarrusel);
 </script>

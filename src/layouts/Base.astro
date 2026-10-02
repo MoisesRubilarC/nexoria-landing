@@ -178,19 +178,25 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
       gsap.ticker.lagSmoothing(0);
     }
 
+    // Solo se descartan los disparadores creados AQUÍ. Matar todos borraba
+    // también los de los componentes, porque el orden de los listeners de
+    // astro:page-load no está garantizado.
+    let mios: ScrollTrigger[] = [];
+
     function montarAnimaciones() {
-      // Al navegar, los ScrollTrigger de la página anterior ya no apuntan a nada.
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      mios.forEach((t) => t.kill());
+      mios = [];
       lenis?.scrollTo(0, { immediate: true });
 
       const barra = document.getElementById('avance-barra');
       if (barra) {
         gsap.set(barra, { height: 0 });
-        gsap.to(barra, {
+        const tw = gsap.to(barra, {
           height: '100%',
           ease: 'none',
           scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
         });
+        mios.push(tw.scrollTrigger!);
       }
 
       // Entradas: cada .revelar sube al asomarse; los hermanos se escalonan.
@@ -202,7 +208,7 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
       });
 
       for (const [, hijos] of grupos) {
-        gsap.from(hijos, {
+        const tw = gsap.from(hijos, {
           y: reducido ? 0 : 30,
           opacity: 0,
           duration: reducido ? 0 : 0.8,
@@ -210,15 +216,17 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
           stagger: reducido ? 0 : 0.08,
           scrollTrigger: { trigger: hijos[0], start: 'top 88%', once: true },
         });
+        if (tw.scrollTrigger) mios.push(tw.scrollTrigger);
       }
 
       if (!reducido) {
         document.querySelectorAll<HTMLElement>('[data-paralaje]').forEach((el) => {
-          gsap.to(el, {
+          const tw = gsap.to(el, {
             yPercent: Number(el.dataset.paralaje),
             ease: 'none',
             scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
           });
+          if (tw.scrollTrigger) mios.push(tw.scrollTrigger);
         });
       }
 
