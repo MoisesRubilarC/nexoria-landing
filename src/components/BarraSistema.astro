@@ -3,6 +3,11 @@
  * Barra superior en módulos, al estilo de una barra de estado de escritorio:
  * pastillas separadas en vez de una franja continua. No es un menú — la
  * navegación va en el dock inferior.
+ *
+ * IMPORTANTE: las lecturas son de DEMOSTRACIÓN, no miden nada. Por eso el
+ * módulo va rotulado y con `title`: un visitante no debe creer que está
+ * viendo el estado real de producción. Si algún día se conectan a AMPROD,
+ * hay que quitar el rótulo "demo" y la fluctuación simulada.
  */
 const lecturas = [
   { k: 'Nodos', v: '248', u: '' },
@@ -25,7 +30,9 @@ const lecturas = [
     </span>
 
     <!-- Módulo: lecturas -->
-    <span class="mod mod--lecturas" aria-hidden="true">
+    <span class="mod mod--lecturas" title="Lecturas de demostración: no reflejan un sistema en producción.">
+      <span class="mod__rotulo">demo</span>
+      <i class="mod__div"></i>
       {lecturas.map((l, i) => (
         <>
           {i > 0 && <i class="mod__div"></i>}
@@ -38,7 +45,7 @@ const lecturas = [
     </span>
 
     <!-- Módulo: alarmas -->
-    <span class="mod mod--alarmas" aria-hidden="true">
+    <span class="mod mod--alarmas" aria-hidden="true" title="Valor de demostración.">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 14.5 18 8.5Z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
       <span class="mod__txt">Alarmas</span>
       <b>0</b>
@@ -100,7 +107,13 @@ const lecturas = [
   @keyframes bs-latir { 70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
   /* ---- Lecturas ---- */
-  .mod--lecturas { gap: 11px; }
+  .mod--lecturas { gap: 9px; cursor: help; }
+  .mod__rotulo {
+    font-size: 9px; letter-spacing: .14em; font-weight: 700;
+    color: #7c6a3a; background: rgba(250, 178, 25, .16);
+    border: 1px solid rgba(250, 178, 25, .3); color: #d9a93c;
+    padding: 1px 6px; border-radius: 5px; flex: none;
+  }
   .lec { display: inline-flex; align-items: baseline; gap: 5px; }
   .lec em { font-style: normal; color: #5d6a8c; }
   .lec b { color: var(--nx-cian); font-variant-numeric: tabular-nums; font-weight: 700; }

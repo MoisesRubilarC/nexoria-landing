@@ -28,7 +28,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--bs-alto, 46px) + 18px); }
 
 body {
   font-family: var(--nx-fuente);
@@ -41,6 +41,11 @@ body {
 }
 
 img, svg { max-width: 100%; display: block; }
+
+/* En pantallas chicas los títulos largos parten palabra antes que desbordar */
+@media (max-width: 560px) {
+  h1, h2, h3 { overflow-wrap: anywhere; }
+}
 a { color: var(--nx-azul); text-decoration: none; }
 
 h1, h2, h3, h4 { font-weight: 700; line-height: 1.12; letter-spacing: -.025em; color: var(--nx-indigo); }
@@ -49,6 +54,7 @@ h2 { font-size: clamp(27px, 3.6vw, 40px); }
 h3 { font-size: clamp(19px, 2vw, 22px); letter-spacing: -.015em; }
 
 .contenedor { width: 100%; max-width: var(--ancho); margin: 0 auto; padding: 0 24px; }
+@media (max-width: 560px) { .contenedor { padding: 0 16px; } }
 .seccion { padding: clamp(64px, 9vw, 112px) 0; }
 .seccion--gris { background: var(--fondo-2); border-block: 1px solid var(--borde); }
 .seccion--noche { background: var(--nx-noche); color: #dbe4f5; }
@@ -90,6 +96,9 @@ h3 { font-size: clamp(19px, 2vw, 22px); letter-spacing: -.015em; }
 .btn--fantasma { color: #fff; border-color: rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); }
 .btn--fantasma:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, .55); }
 .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+@media (max-width: 460px) {
+  .btn { width: 100%; justify-content: center; padding: 14px 20px; }
+}
 
 /* Tarjetas */
 .rejilla { display: grid; gap: 22px; }

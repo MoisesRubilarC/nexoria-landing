@@ -11,6 +11,8 @@ export default defineConfig({
   // El panel de contenido no va en el sitemap ni en buscadores.
   integrations: [sitemap({ filter: (pagina) => !pagina.includes('/admin') })],
   build: { format: 'directory' },
+  // La barra de herramientas de Astro se superponía al dock en desarrollo.
+  devToolbar: { enabled: false },
   vite: esDesarrollo
     ? {}
     : {

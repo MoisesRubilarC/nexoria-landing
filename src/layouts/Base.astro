@@ -90,7 +90,7 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
     /* Aire al final para que el dock no tape el pie de página */
     .consola > :global(footer) { padding-bottom: var(--dock-alto); }
 
-    @media (max-width: 720px) { :root { --dock-alto: 84px; } }
+    @media (max-width: 720px) { :root { --bs-alto: 42px; --dock-alto: 96px; } }
 
     .saltar {
       position: absolute; left: 12px; top: -60px; z-index: 100;
