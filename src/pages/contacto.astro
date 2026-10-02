@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Cabecera from '../components/Cabecera.astro';
 
 const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden - b.data.orden);
 
@@ -14,11 +14,11 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
   titulo="Contacto y cotización"
   descripcion="Cuéntanos qué equipos quieres monitorear y te preparamos una propuesta a tu medida, sin costo y sin compromiso."
 >
-  <Hero
-    compacto
-    sobretitulo="Hablemos"
+  <Cabecera
+    seccion="Hablemos"
     titulo="Cuéntanos de tu planta"
     bajada="Completa el formulario y te respondemos dentro de un día hábil con una propuesta ajustada a tu operación. Sin costo y sin compromiso."
+    ruta={[{ texto: 'Contacto' }]}
   />
 
   <section class="seccion">
@@ -149,9 +149,13 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
 <script>
 function montarFormulario() {
 
-    const form = document.getElementById('form-cotizacion') as HTMLFormElement;
-    const boton = document.getElementById('btn-enviar') as HTMLButtonElement;
-    const aviso = document.getElementById('aviso') as HTMLParagraphElement;
+    // El script viaja en todas las páginas; sin formulario no hay nada que hacer.
+    const form = document.getElementById('form-cotizacion') as HTMLFormElement | null;
+    const botonEl = document.getElementById('btn-enviar') as HTMLButtonElement | null;
+    const avisoEl = document.getElementById('aviso') as HTMLParagraphElement | null;
+    if (!form || !botonEl || !avisoEl) return;
+    const boton = botonEl;
+    const aviso = avisoEl;
     const endpoint = form.dataset.endpoint ?? '';
 
     function mostrar(texto: string, tipo: 'ok' | 'error') {

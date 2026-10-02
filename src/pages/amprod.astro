@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Cabecera from '../components/Cabecera.astro';
 import VistaProducto from '../components/VistaProducto.astro';
 
 const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden);
@@ -22,11 +22,12 @@ const etiquetaEstado = {
   titulo={amprod ? amprod.data.nombre : 'AMPROD'}
   descripcion={amprod?.data.resumen ?? 'La plataforma de Nexoria para el monitoreo de variadores de frecuencia en tiempo real.'}
 >
-  <Hero
-    sobretitulo="Plataforma"
+  <Cabecera
+    seccion="Plataforma"
     titulo={amprod?.data.nombre ?? 'AMPROD'}
     destacado={amprod?.data.lema}
     bajada={amprod?.data.resumen ?? ''}
+    ruta={[{ texto: 'AMPROD' }]}
   >
     {amprod?.data.url && (
       <a href={amprod.data.url} class="btn btn--primario" rel="noopener">
@@ -35,7 +36,7 @@ const etiquetaEstado = {
       </a>
     )}
     <a href="/contacto/" class="btn btn--fantasma">Solicitar una demo</a>
-  </Hero>
+  </Cabecera>
 
   {amprod && (
     <>

@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Hero from '../../components/Hero.astro';
+import Cabecera from '../../components/Cabecera.astro';
 import Icono from '../../components/Icono.astro';
 
 export async function getStaticPaths() {
@@ -22,15 +22,15 @@ const otros = (await getCollection('servicios'))
 ---
 
 <Base titulo={servicio.data.titulo} descripcion={servicio.data.resumen}>
-  <Hero
-    compacto
-    sobretitulo="Servicio"
+  <Cabecera
+    seccion="Servicio"
     titulo={servicio.data.titulo}
     bajada={servicio.data.resumen}
+    ruta={[{ texto: 'Servicios', href: '/servicios/' }, { texto: servicio.data.titulo }]}
   >
     <a href="/contacto/" class="btn btn--primario">Cotizar este servicio</a>
     <a href="/servicios/" class="btn btn--fantasma">Ver todos</a>
-  </Hero>
+  </Cabecera>
 
   <section class="seccion">
     <div class="contenedor detalle">

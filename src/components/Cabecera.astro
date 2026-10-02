@@ -1,0 +1,124 @@
+---
+/**
+ * Cabecera de página interna, con el mismo lenguaje de consola que la portada:
+ * ruta tipo sistema de archivos, título y una rejilla técnica de fondo.
+ * Reemplaza al Hero genérico con canvas.
+ */
+interface Props {
+  seccion: string;
+  titulo: string;
+  destacado?: string;
+  bajada?: string;
+  ruta?: { texto: string; href?: string }[];
+}
+
+const { seccion, titulo, destacado, bajada, ruta = [] } = Astro.props;
+---
+
+<section class="cab-p">
+  <div class="cab-p__trama" aria-hidden="true"></div>
+  <div class="cab-p__brillo" aria-hidden="true"></div>
+  <div class="cab-p__linea" aria-hidden="true"></div>
+
+  <div class="contenedor cab-p__dentro">
+    <nav class="cab-p__ruta" aria-label="Ruta">
+      <a href="/">Inicio</a>
+      {ruta.map((r) => (
+        <>
+          <span aria-hidden="true">/</span>
+          {r.href ? <a href={r.href}>{r.texto}</a> : <span class="es-actual">{r.texto}</span>}
+        </>
+      ))}
+    </nav>
+
+    <span class="cab-p__seccion">
+      <i class="cab-p__punto" aria-hidden="true"></i>
+      {seccion}
+    </span>
+
+    <h1>
+      {titulo}
+      {destacado && <> <span class="cab-p__grad">{destacado}</span></>}
+    </h1>
+
+    {bajada && <p class="cab-p__bajada">{bajada}</p>}
+
+    <div class="cab-p__acciones"><slot /></div>
+  </div>
+</section>
+
+<style>
+  .cab-p {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: var(--nx-noche); color: #a9b6d4;
+    padding: clamp(44px, 6vw, 76px) 0 clamp(40px, 5.5vw, 68px);
+    border-bottom: 1px solid rgba(110, 170, 235, .14);
+  }
+
+  /* Rejilla técnica tenue, no una foto: pesa cero y encaja con la consola */
+  .cab-p__trama {
+    position: absolute; inset: 0; z-index: 0; opacity: .5;
+    background-image:
+      linear-gradient(rgba(110, 170, 235, .07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 170, 235, .07) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(90% 120% at 12% 20%, #000, transparent 72%);
+    -webkit-mask-image: radial-gradient(90% 120% at 12% 20%, #000, transparent 72%);
+  }
+  .cab-p__brillo {
+    position: absolute; z-index: 0; pointer-events: none;
+    width: 42vmax; height: 42vmax; right: -14vmax; top: -22vmax;
+    border-radius: 50%; filter: blur(100px);
+    background: radial-gradient(circle, rgba(45, 102, 171, .42), transparent 68%);
+  }
+  /* Línea de luz que recorre el borde inferior */
+  .cab-p__linea {
+    position: absolute; z-index: 1; inset-inline: 0; bottom: 0; height: 1px; overflow: hidden;
+  }
+  .cab-p__linea::after {
+    content: ''; position: absolute; inset-block: 0; width: 30%;
+    background: linear-gradient(90deg, transparent, var(--nx-cian), transparent);
+    animation: cab-recorrer 6s cubic-bezier(.5, 0, .5, 1) infinite;
+  }
+  @keyframes cab-recorrer {
+    0% { transform: translateX(-110%); }
+    100% { transform: translateX(440%); }
+  }
+
+  .cab-p__dentro { position: relative; z-index: 2; }
+
+  .cab-p__ruta {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase;
+    color: #5d6a8c; font-weight: 650; margin-bottom: 20px;
+  }
+  .cab-p__ruta a { color: #7c89ab; transition: color .2s ease; }
+  .cab-p__ruta a:hover { color: var(--nx-cian); }
+  .cab-p__ruta .es-actual { color: #cbd6ee; }
+
+  .cab-p__seccion {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; margin-bottom: 18px; border-radius: 999px;
+    border: 1px solid rgba(110, 170, 235, .22); background: rgba(255, 255, 255, .04);
+    font-size: 11.5px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; color: #9edcf2;
+  }
+  .cab-p__punto {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--nx-cian);
+    box-shadow: 0 0 0 0 rgba(70, 192, 216, .6);
+    animation: cab-latir 2.4s cubic-bezier(.2, .7, .3, 1) infinite;
+  }
+  @keyframes cab-latir { 70% { box-shadow: 0 0 0 8px rgba(70, 192, 216, 0); } 100% { box-shadow: 0 0 0 0 rgba(70, 192, 216, 0); } }
+
+  .cab-p :global(h1) { color: #fff; max-width: 18ch; font-size: clamp(31px, 4.4vw, 50px); }
+  .cab-p__grad {
+    background: linear-gradient(100deg, #9edcf2, #46C0D8 50%, #7fb6ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .cab-p__bajada { margin-top: 18px; max-width: 58ch; font-size: clamp(15.5px, 1.6vw, 18px); color: #a9b6d4; }
+  .cab-p__acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .cab-p__acciones:empty { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cab-p__linea::after, .cab-p__punto { animation: none; }
+  }
+</style>

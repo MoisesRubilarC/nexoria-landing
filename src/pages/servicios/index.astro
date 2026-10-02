@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Hero from '../../components/Hero.astro';
+import Cabecera from '../../components/Cabecera.astro';
 import Icono from '../../components/Icono.astro';
 
 const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden - b.data.orden);
@@ -11,15 +11,15 @@ const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden
   titulo="Servicios"
   descripcion="Monitoreo continuo, telemetría industrial, mantenimiento predictivo, alertas, integración en planta y tableros a medida."
 >
-  <Hero
-    compacto
-    sobretitulo="Servicios"
+  <Cabecera
+    seccion="Servicios"
     titulo="Todo lo que necesita"
     destacado="una planta conectada"
     bajada="Desde el levantamiento en terreno hasta los modelos que anticipan una falla. Puedes tomar el proceso completo o solo la parte que te falta."
+    ruta={[{ texto: 'Servicios' }]}
   >
     <a href="/contacto/" class="btn btn--primario">Solicitar cotización</a>
-  </Hero>
+  </Cabecera>
 
   <section class="seccion">
     <div class="contenedor">

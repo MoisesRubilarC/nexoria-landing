@@ -1,16 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Cabecera from '../components/Cabecera.astro';
 ---
 
 <Base titulo="Página no encontrada" descripcion="La página que buscas no existe o cambió de dirección.">
-  <Hero
-    sobretitulo="Error 404"
+  <Cabecera
+    seccion="Error 404"
     titulo="Esta página"
     destacado="no existe."
     bajada="Puede que el enlace esté roto o que la página haya cambiado de dirección. Desde aquí puedes volver al inicio o escribirnos."
+    ruta={[{ texto: 'No encontrada' }]}
   >
     <a href="/" class="btn btn--primario">Volver al inicio</a>
     <a href="/contacto/" class="btn btn--fantasma">Contacto</a>
-  </Hero>
+  </Cabecera>
 </Base>

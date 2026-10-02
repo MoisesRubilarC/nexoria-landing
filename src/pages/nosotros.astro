@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Cabecera from '../components/Cabecera.astro';
 
 // Estructura tomada del documento interno "Estructura organizacional Nexoria"
 // (septiembre 2026). Los textos de "En qué creemos" siguen siendo borrador.
@@ -62,12 +62,12 @@ const equipo = [
   titulo="Nosotros"
   descripcion="Nexoria es una empresa chilena de monitoreo industrial. Conectamos los datos de planta con las decisiones de mantención y operación."
 >
-  <Hero
-    compacto
-    sobretitulo="Nosotros"
+  <Cabecera
+    seccion="Nosotros"
     titulo="Conectamos datos."
     destacado="Impulsamos decisiones."
     bajada="Somos una empresa chilena dedicada al monitoreo industrial. Nacimos de ver el mismo problema una y otra vez: plantas llenas de datos que nadie alcanza a usar a tiempo."
+    ruta={[{ texto: 'Nosotros' }]}
   />
 
   <section class="seccion">

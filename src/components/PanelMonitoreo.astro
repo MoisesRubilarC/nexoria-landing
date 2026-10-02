@@ -234,11 +234,14 @@ let intervaloPanel = 0;
 function montarPanel() {
   clearInterval(intervaloPanel);
 
+    // Este script se carga en todas las páginas; si el panel no está, se sale.
+    const svg = document.getElementById('grafico-corriente');
+    if (!svg) return;
 
     /* ---------- reloj ---------- */
     const reloj = document.getElementById('panel-reloj');
     const tic = () => {
-      reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
+      if (reloj) reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
     };
     tic();
     intervaloPanel = setInterval(tic, 1000);
@@ -289,11 +292,11 @@ function montarPanel() {
     }
 
     /* ---------- cruz y globo ---------- */
-    const svg = document.getElementById('grafico-corriente');
     const zona = document.getElementById('zona-hover');
     const cruz = document.getElementById('cruz');
     const foco = document.getElementById('foco');
     const globo = document.getElementById('globo');
+    if (!zona || !cruz || !foco || !globo) return;
     const caja = globo.parentElement;
 
     const posX = (i) => M.izquierda + (i / (PUNTOS - 1)) * ancho;
