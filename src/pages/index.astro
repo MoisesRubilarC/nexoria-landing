@@ -1,107 +1,44 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import HeroProducto from '../components/HeroProducto.astro';
-import Icono from '../components/Icono.astro';
-import Clientes from '../components/Clientes.astro';
-import Telemetria from '../components/Telemetria.astro';
+import Contraste from '../components/Contraste.astro';
+import ServiciosCarrusel from '../components/ServiciosCarrusel.astro';
 import PanelMonitoreo from '../components/PanelMonitoreo.astro';
 import Cifras from '../components/Cifras.astro';
-
-const servicios = (await getCollection('servicios'))
-  .filter((s) => s.data.destacado)
-  .sort((a, b) => a.data.orden - b.data.orden);
-
-const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden);
+import Objeciones from '../components/Objeciones.astro';
+import Clientes from '../components/Clientes.astro';
 
 const pasos = [
-  { n: '01', t: 'Levantamiento', d: 'Visitamos la planta, identificamos los equipos críticos y definimos qué variables importan para tu operación.' },
-  { n: '02', t: 'Conexión', d: 'Instalamos y configuramos la captura de datos sin detener la línea, integrando los equipos que ya tienes.' },
-  { n: '03', t: 'Puesta en marcha', d: 'Dejamos los tableros y las alertas funcionando, y capacitamos al equipo de mantención y operaciones.' },
-  { n: '04', t: 'Acompañamiento', d: 'Ajustamos umbrales, sumamos equipos y afinamos los modelos a medida que se acumula histórico.' },
+  { n: '01', t: 'Visitamos tu planta', d: 'Vamos a terreno, revisamos qué equipos tienes y cuáles son críticos para tu producción. Sin costo.' },
+  { n: '02', t: 'Conectamos', d: 'Instalamos la captura de datos sobre los equipos que ya están, sin detener la línea.' },
+  { n: '03', t: 'Dejamos operando', d: 'Tableros y alertas funcionando, y tu equipo de mantención capacitado para usarlos.' },
+  { n: '04', t: 'Seguimos encima', d: 'Afinamos umbrales y sumamos equipos a medida que se acumula histórico.' },
 ];
 ---
 
 <Base
   titulo="Nexoria"
-  descripcion="Monitoreo industrial en tiempo real y mantenimiento predictivo. Conectamos los datos de tu línea de producción para anticipar fallas antes de que ocurran."
+  descripcion="Monitoreo industrial en tiempo real para líneas de producción. Conectamos tus variadores y sensores, y avisamos cuando un equipo empieza a fallar: antes de la parada, no después."
 >
   <HeroProducto />
 
-  <Telemetria />
-  <Cifras />
+  <!-- 1. El problema, antes que cualquier característica -->
+  <Contraste />
 
-  <!-- Servicios destacados -->
-  <section class="seccion">
-    <div class="contenedor">
-      <div class="cabecera cabecera--centro revelar">
-        <span class="sobretitulo">Qué hacemos</span>
-        <h2>De los datos sueltos a <span class="grad">decisiones concretas</span></h2>
-        <p class="bajada">
-          Tus equipos ya generan información. El problema es que queda encerrada en cada
-          máquina y solo se revisa cuando algo falló. Nosotros la sacamos de ahí.
-        </p>
-      </div>
+  <!-- 2. Qué hacemos, en horizontal -->
+  <ServiciosCarrusel />
 
-      <div class="rejilla rejilla--3">
-        {servicios.map((s) => (
-          <a href={`/servicios/${s.id}/`} class="tarjeta servicio revelar">
-            <span class="servicio__icono"><Icono nombre={s.data.icono} tam={22} /></span>
-            <h3>{s.data.titulo}</h3>
-            <p>{s.data.resumen}</p>
-            <span class="servicio__mas">
-              Ver más
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-            </span>
-          </a>
-        ))}
-      </div>
-
-      <div class="centrado revelar">
-        <a href="/servicios/" class="btn btn--secundario">Ver todos los servicios</a>
-      </div>
-    </div>
-  </section>
-
+  <!-- 3. La prueba: el producto funcionando -->
   <PanelMonitoreo />
 
-  <!-- Producto -->
-  {productos.length > 0 && (
-    <section class="seccion seccion--gris">
-      <div class="contenedor">
-        <div class="cabecera cabecera--centro revelar">
-          <span class="sobretitulo">Nuestra plataforma</span>
-          <h2>Productos Nexoria</h2>
-        </div>
+  <Cifras />
 
-        <div class="rejilla rejilla--2">
-          {productos.map((p) => (
-            <article class="tarjeta producto revelar">
-              <div class="producto__cab">
-                <h3>{p.data.nombre}</h3>
-                <span class:list={['pastilla', `pastilla--${p.data.estado}`]}>
-                  {p.data.estado === 'disponible' ? 'Disponible' : p.data.estado === 'beta' ? 'En beta' : 'En desarrollo'}
-                </span>
-              </div>
-              <p class="producto__lema">{p.data.lema}</p>
-              <p>{p.data.resumen}</p>
-              <div class="producto__acciones">
-                <a href="/amprod/" class="btn btn--secundario">Ver detalle</a>
-                {p.data.url && <a href={p.data.url} class="btn btn--primario" rel="noopener">Ingresar</a>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Cómo trabajamos -->
-  <section class="seccion">
+  <!-- 4. Cómo se parte -->
+  <section class="seccion proceso">
     <div class="contenedor">
       <div class="cabecera revelar">
-        <span class="sobretitulo">Cómo trabajamos</span>
-        <h2>De la primera visita a la planta monitoreada</h2>
+        <span class="sobretitulo">Cómo partimos</span>
+        <h2>De la primera visita<br /><span class="grad">a la planta monitoreada</span></h2>
       </div>
 
       <ol class="pasos">
@@ -116,60 +53,66 @@ const pasos = [
     </div>
   </section>
 
+  <!-- 5. Las dudas que frenan -->
+  <Objeciones />
+
   <Clientes />
 
-  <!-- Llamado final -->
-  <section class="seccion seccion--noche cta">
-    <div class="contenedor cabecera cabecera--centro revelar" style="margin-bottom:0">
-      <h2>¿Conversamos sobre tu planta?</h2>
-      <p class="bajada">
-        Cuéntanos qué equipos quieres monitorear y te preparamos una propuesta a tu medida,
-        sin costo y sin compromiso.
+  <!-- 6. Cierre -->
+  <section class="cierre">
+    <div class="contenedor cierre__caja revelar">
+      <span class="sobretitulo">Siguiente paso</span>
+      <h2>Partamos por un equipo</h2>
+      <p>
+        No hace falta comprometer la planta entera. Elegimos juntos el equipo que más
+        te preocupa, lo dejamos monitoreado y decides con datos sobre la mesa.
       </p>
-      <div class="cta__acciones">
-        <a href="/contacto/" class="btn btn--primario">Solicitar cotización</a>
+      <div class="cierre__acciones">
+        <a href="/contacto/" class="btn btn--primario">
+          Solicitar cotización
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+        </a>
         <a href="mailto:contacto@nexoriachile.com" class="btn btn--fantasma">contacto@nexoriachile.com</a>
       </div>
+      <span class="cierre__pie">Visita y propuesta sin costo · Región del Biobío y todo Chile</span>
     </div>
   </section>
 </Base>
 
 <style>
-  .servicio { display: block; color: inherit; }
-  .servicio__icono {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px; border-radius: 12px; margin-bottom: 18px;
-    background: linear-gradient(135deg, rgba(34, 42, 114, .1), rgba(70, 192, 216, .16));
-    color: var(--nx-azul);
+  .pasos { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); list-style: none; }
+  .paso { position: relative; padding: 26px 20px 26px 0; border-top: 2px solid var(--fondo-3); }
+  .paso::after {
+    content: ''; position: absolute; left: 0; top: -2px; width: 0; height: 2px;
+    background: var(--nx-degradado);
+    transition: width .6s cubic-bezier(.2, .7, .2, 1);
   }
-  .servicio__mas {
-    display: inline-flex; align-items: center; gap: 7px; margin-top: 18px;
-    font-size: 14.5px; font-weight: 600; color: var(--nx-azul);
-  }
-  .servicio:hover .servicio__mas svg { transform: translateX(3px); }
-  .servicio__mas svg { transition: transform .2s ease; }
-
-  .centrado { display: flex; justify-content: center; margin-top: 40px; }
-
-  .producto__cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .producto__lema { font-weight: 600; color: var(--nx-azul) !important; margin-top: 8px !important; }
-  .producto__acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-  .pastilla {
-    font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    padding: 5px 11px; border-radius: 999px;
-  }
-  .pastilla--disponible { background: rgba(70, 192, 216, .16); color: #1a7f96; }
-  .pastilla--beta { background: rgba(49, 165, 221, .15); color: #1d6f99; }
-  .pastilla--desarrollo { background: #eef1f6; color: var(--texto-3); }
-
-  .pasos { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); list-style: none; }
-  .paso { position: relative; padding: 26px 22px 26px 0; border-top: 2px solid var(--fondo-3); }
-  .paso__n {
-    display: block; font-size: 13px; font-weight: 700; letter-spacing: .12em;
-    color: var(--nx-cielo); margin-bottom: 12px;
-  }
+  .paso:hover::after { width: 100%; }
+  .paso__n { display: block; font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--nx-cielo); margin-bottom: 12px; }
   .paso h3 { font-size: 18.5px; }
   .paso p { margin-top: 10px; color: var(--texto-2); font-size: 15px; }
 
-  .cta__acciones { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; margin-top: 32px; }
+  .cierre { background: var(--nx-noche); padding: clamp(56px, 8vw, 96px) 0 clamp(64px, 9vw, 104px); }
+  .cierre__caja {
+    position: relative;
+    max-width: 760px; text-align: center;
+    padding: clamp(36px, 5vw, 56px) clamp(24px, 4vw, 48px);
+    border: 1px solid rgba(110, 170, 235, .22);
+    border-radius: 20px;
+    background:
+      radial-gradient(120% 140% at 50% 0%, rgba(45, 102, 171, .34), transparent 62%),
+      rgba(255, 255, 255, .03);
+    overflow: hidden;
+  }
+  .cierre__caja::before {
+    content: ''; position: absolute; inset-inline: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--nx-cian), transparent);
+  }
+  .cierre__caja :global(h2) { color: #fff; }
+  .cierre__caja p { margin: 16px auto 0; max-width: 52ch; color: #a9b6d4; font-size: 17px; }
+  .cierre__acciones { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; margin-top: 32px; }
+  .cierre__pie {
+    display: block; margin-top: 24px;
+    font-size: 12.5px; letter-spacing: .07em; text-transform: uppercase; color: #5d6a8c; font-weight: 600;
+  }
 </style>

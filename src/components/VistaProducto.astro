@@ -290,41 +290,47 @@ const pestanas = ['Resumen', 'Tendencias', 'Alarmas', 'Eventos', 'Histórico'];
 </style>
 
 <script>
-  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function montarVista() {
 
-  function activar(vista: Element) {
-    vista.querySelectorAll<SVGPathElement>('.gauge__arco').forEach((arco, i) => {
-      const p = arco.dataset.pct ?? '0';
-      setTimeout(() => { arco.setAttribute('stroke-dasharray', `${p} 100`); }, reducido ? 0 : i * 110);
+    const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function activar(vista: Element) {
+      vista.querySelectorAll<SVGPathElement>('.gauge__arco').forEach((arco, i) => {
+        const p = arco.dataset.pct ?? '0';
+        setTimeout(() => { arco.setAttribute('stroke-dasharray', `${p} 100`); }, reducido ? 0 : i * 110);
+      });
+
+      vista.querySelectorAll<HTMLElement>('.gauge__valor').forEach((el, i) => {
+        const hasta = parseFloat(el.dataset.hasta ?? '0');
+        const dec = parseInt(el.dataset.decimales ?? '0', 10);
+        const fmt = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+        if (reducido) { el.textContent = fmt(hasta); return; }
+
+        setTimeout(() => {
+          const inicio = performance.now();
+          const paso = (ahora: number) => {
+            const t = Math.min(1, (ahora - inicio) / 1500);
+            el.textContent = fmt(hasta * (1 - Math.pow(1 - t, 3)));
+            if (t < 1) requestAnimationFrame(paso);
+          };
+          requestAnimationFrame(paso);
+        }, i * 110);
+      });
+    }
+
+    document.querySelectorAll('.vista').forEach((vista) => {
+      const io = new IntersectionObserver((entradas) => {
+        for (const e of entradas) {
+          if (!e.isIntersecting) continue;
+          activar(e.target);
+          io.disconnect();
+        }
+      }, { threshold: 0.15 });
+      io.observe(vista);
     });
 
-    vista.querySelectorAll<HTMLElement>('.gauge__valor').forEach((el, i) => {
-      const hasta = parseFloat(el.dataset.hasta ?? '0');
-      const dec = parseInt(el.dataset.decimales ?? '0', 10);
-      const fmt = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
 
-      if (reducido) { el.textContent = fmt(hasta); return; }
-
-      setTimeout(() => {
-        const inicio = performance.now();
-        const paso = (ahora: number) => {
-          const t = Math.min(1, (ahora - inicio) / 1500);
-          el.textContent = fmt(hasta * (1 - Math.pow(1 - t, 3)));
-          if (t < 1) requestAnimationFrame(paso);
-        };
-        requestAnimationFrame(paso);
-      }, i * 110);
-    });
-  }
-
-  document.querySelectorAll('.vista').forEach((vista) => {
-    const io = new IntersectionObserver((entradas) => {
-      for (const e of entradas) {
-        if (!e.isIntersecting) continue;
-        activar(e.target);
-        io.disconnect();
-      }
-    }, { threshold: 0.15 });
-    io.observe(vista);
-  });
+document.addEventListener('astro:page-load', montarVista);
 </script>

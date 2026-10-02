@@ -43,27 +43,33 @@ const cifras = [
 </style>
 
 <script>
-  const cuentas = document.querySelectorAll<HTMLElement>('.contador-cifra');
-  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function montarCifras() {
 
-  if (reducido) {
-    cuentas.forEach((el) => { el.textContent = el.dataset.hasta ?? '0'; });
-  } else {
-    const obs = new IntersectionObserver((entradas) => {
-      for (const e of entradas) {
-        if (!e.isIntersecting) continue;
-        const el = e.target as HTMLElement;
-        const hasta = parseFloat(el.dataset.hasta ?? '0');
-        const inicio = performance.now();
-        const paso = (ahora: number) => {
-          const t = Math.min(1, (ahora - inicio) / 1200);
-          el.textContent = String(Math.round(hasta * (1 - Math.pow(1 - t, 3))));
-          if (t < 1) requestAnimationFrame(paso);
-        };
-        requestAnimationFrame(paso);
-        obs.unobserve(el);
-      }
-    }, { threshold: 0.5 });
-    cuentas.forEach((el) => obs.observe(el));
-  }
+    const cuentas = document.querySelectorAll<HTMLElement>('.contador-cifra');
+    const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reducido) {
+      cuentas.forEach((el) => { el.textContent = el.dataset.hasta ?? '0'; });
+    } else {
+      const obs = new IntersectionObserver((entradas) => {
+        for (const e of entradas) {
+          if (!e.isIntersecting) continue;
+          const el = e.target as HTMLElement;
+          const hasta = parseFloat(el.dataset.hasta ?? '0');
+          const inicio = performance.now();
+          const paso = (ahora: number) => {
+            const t = Math.min(1, (ahora - inicio) / 1200);
+            el.textContent = String(Math.round(hasta * (1 - Math.pow(1 - t, 3))));
+            if (t < 1) requestAnimationFrame(paso);
+          };
+          requestAnimationFrame(paso);
+          obs.unobserve(el);
+        }
+      }, { threshold: 0.5 });
+      cuentas.forEach((el) => obs.observe(el));
+    }
+
+}
+
+document.addEventListener('astro:page-load', montarCifras);
 </script>

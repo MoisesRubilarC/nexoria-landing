@@ -149,63 +149,69 @@ import VistaProducto from './VistaProducto.astro';
 </style>
 
 <script>
-  // Red de sensores, sutil: acompaña la foto sin taparla.
-  const lienzo = document.getElementById('hp-red') as HTMLCanvasElement | null;
-  if (lienzo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const ctx = lienzo.getContext('2d')!;
-    type Nodo = { x: number; y: number; vx: number; vy: number; r: number; f: number };
-    let ancho = 0, alto = 0, nodos: Nodo[] = [], anim = 0;
-    const ENLACE = 140;
+function montarHeroRed() {
 
-    function medir() {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      ancho = lienzo!.clientWidth;
-      alto = lienzo!.clientHeight;
-      lienzo!.width = ancho * dpr;
-      lienzo!.height = alto * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const n = Math.round(Math.min(60, Math.max(18, (ancho * alto) / 26000)));
-      nodos = Array.from({ length: n }, () => ({
-        x: Math.random() * ancho, y: Math.random() * alto,
-        vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
-        r: Math.random() * 1.3 + 0.7, f: Math.random() * Math.PI * 2,
-      }));
-    }
+    // Red de sensores, sutil: acompaña la foto sin taparla.
+    const lienzo = document.getElementById('hp-red') as HTMLCanvasElement | null;
+    if (lienzo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const ctx = lienzo.getContext('2d')!;
+      type Nodo = { x: number; y: number; vx: number; vy: number; r: number; f: number };
+      let ancho = 0, alto = 0, nodos: Nodo[] = [], anim = 0;
+      const ENLACE = 140;
 
-    function pintar(t: number) {
-      ctx.clearRect(0, 0, ancho, alto);
-      for (const n of nodos) {
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < 0 || n.x > ancho) n.vx *= -1;
-        if (n.y < 0 || n.y > alto) n.vy *= -1;
+      function medir() {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        ancho = lienzo!.clientWidth;
+        alto = lienzo!.clientHeight;
+        lienzo!.width = ancho * dpr;
+        lienzo!.height = alto * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const n = Math.round(Math.min(60, Math.max(18, (ancho * alto) / 26000)));
+        nodos = Array.from({ length: n }, () => ({
+          x: Math.random() * ancho, y: Math.random() * alto,
+          vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+          r: Math.random() * 1.3 + 0.7, f: Math.random() * Math.PI * 2,
+        }));
       }
-      for (let i = 0; i < nodos.length; i++) {
-        for (let j = i + 1; j < nodos.length; j++) {
-          const a = nodos[i], b = nodos[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 > ENLACE * ENLACE) continue;
-          ctx.strokeStyle = `rgba(110, 170, 235, ${(1 - Math.sqrt(d2) / ENLACE) * 0.14})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+
+      function pintar(t: number) {
+        ctx.clearRect(0, 0, ancho, alto);
+        for (const n of nodos) {
+          n.x += n.vx; n.y += n.vy;
+          if (n.x < 0 || n.x > ancho) n.vx *= -1;
+          if (n.y < 0 || n.y > alto) n.vy *= -1;
         }
+        for (let i = 0; i < nodos.length; i++) {
+          for (let j = i + 1; j < nodos.length; j++) {
+            const a = nodos[i], b = nodos[j];
+            const dx = a.x - b.x, dy = a.y - b.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 > ENLACE * ENLACE) continue;
+            ctx.strokeStyle = `rgba(110, 170, 235, ${(1 - Math.sqrt(d2) / ENLACE) * 0.14})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+        for (const n of nodos) {
+          const pulso = 0.5 + 0.5 * Math.sin(t / 800 + n.f);
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(158, 220, 242, ${0.14 + 0.2 * pulso})`;
+          ctx.fill();
+        }
+        anim = requestAnimationFrame(pintar);
       }
-      for (const n of nodos) {
-        const pulso = 0.5 + 0.5 * Math.sin(t / 800 + n.f);
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(158, 220, 242, ${0.14 + 0.2 * pulso})`;
-        ctx.fill();
-      }
+
+      addEventListener('resize', medir, { passive: true });
+      document.addEventListener('visibilitychange', () => {
+        cancelAnimationFrame(anim);
+        if (!document.hidden) anim = requestAnimationFrame(pintar);
+      });
+      medir();
       anim = requestAnimationFrame(pintar);
     }
 
-    addEventListener('resize', medir, { passive: true });
-    document.addEventListener('visibilitychange', () => {
-      cancelAnimationFrame(anim);
-      if (!document.hidden) anim = requestAnimationFrame(pintar);
-    });
-    medir();
-    anim = requestAnimationFrame(pintar);
-  }
+}
+
+document.addEventListener('astro:page-load', montarHeroRed);
 </script>

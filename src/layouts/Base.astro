@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css';
-import Encabezado from '../components/Encabezado.astro';
+import BarraEstado from '../components/BarraEstado.astro';
+import Riel from '../components/Riel.astro';
 import PieDePagina from '../components/PieDePagina.astro';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   titulo: string;
@@ -23,7 +25,7 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
   <title>{tituloCompleto}</title>
   <meta name="description" content={descripcion} />
   <link rel="canonical" href={url} />
-  <meta name="theme-color" content="#0B1230" />
+  <meta name="theme-color" content="#050918" />
 
   <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />
   <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
@@ -40,6 +42,8 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
 
   <link rel="preload" href="/fuentes/Montserrat[wght].ttf" as="font" type="font/ttf" crossorigin />
 
+  <ClientRouter />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -54,40 +58,185 @@ const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
 
 <body>
   <a href="#principal" class="saltar">Saltar al contenido</a>
-  <Encabezado />
-  <main id="principal">
-    <slot />
-  </main>
-  <PieDePagina />
+
+  <BarraEstado transition:persist />
+  <Riel transition:animate="none" />
+
+  <!-- Indicador de avance, a la derecha, como una columna de nivel -->
+  <div class="avance" aria-hidden="true"><span id="avance-barra"></span></div>
+  <div class="barrido" id="barrido" aria-hidden="true"></div>
+
+  <div class="consola">
+    <main id="principal">
+      <slot />
+    </main>
+    <PieDePagina />
+  </div>
 
   <style is:global>
+    :root {
+      --barra-alto: 34px;
+      --riel-ancho: 68px;
+      --riel-abierto: 206px;
+      --riel-movil: 60px;
+    }
+
+    .consola {
+      margin-left: var(--riel-ancho);
+      padding-bottom: var(--barra-alto);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    .consola > main { flex: 1; }
+
+    @media (max-width: 900px) {
+      .consola { margin-left: 0; padding-bottom: calc(var(--riel-movil) + var(--barra-alto)); }
+    }
+
     .saltar {
       position: absolute; left: 12px; top: -60px; z-index: 100;
-      background: var(--nx-indigo); color: #fff; padding: 10px 18px;
-      border-radius: 0 0 10px 10px; font-weight: 600; transition: top .2s ease;
+      background: var(--nx-cian); color: #04121c; padding: 10px 18px;
+      border-radius: 0 0 10px 10px; font-weight: 700; transition: top .2s ease;
     }
     .saltar:focus { top: 0; }
+
+    /* El riel, la barra y el avance se capturan por separado: al tener nombre
+       propio quedan fuera de la animación de la raíz y no se mueven al navegar. */
+    .riel   { view-transition-name: nx-riel; }
+    .barra  { view-transition-name: nx-barra; }
+    .avance { view-transition-name: nx-avance; }
+    .barrido { view-transition-name: nx-barrido; }
+
+    /* ---- Transición entre páginas ----
+       El contenido sale hacia arriba y el nuevo entra desde abajo, con un
+       barrido de luz al borde del riel. El riel y la barra no se mueven:
+       el sitio se comporta como una aplicación, no como páginas sueltas. */
+    @keyframes nx-salir {
+      to { opacity: 0; transform: translateY(-14px); filter: blur(3px); }
+    }
+    @keyframes nx-entrar {
+      from { opacity: 0; transform: translateY(22px); filter: blur(4px); }
+    }
+
+    ::view-transition-old(root) {
+      animation: nx-salir .3s cubic-bezier(.4, 0, 1, 1) forwards;
+    }
+    ::view-transition-new(root) {
+      animation: nx-entrar .48s cubic-bezier(.16, .84, .32, 1) .06s backwards;
+    }
+
+    /* Barrido de carga sobre el riel */
+    .barrido {
+      position: fixed; z-index: 68; left: 0; top: 0; bottom: var(--barra-alto);
+      width: var(--riel-ancho); pointer-events: none; overflow: hidden;
+      opacity: 0;
+    }
+    .barrido::after {
+      content: ''; position: absolute; inset-inline: 0; height: 38%;
+      background: linear-gradient(180deg, transparent, rgba(70, 192, 216, .45), transparent);
+      transform: translateY(-120%);
+    }
+    .barrido.activo { opacity: 1; }
+    .barrido.activo::after { animation: nx-barrer .62s cubic-bezier(.4, 0, .3, 1); }
+    @keyframes nx-barrer {
+      from { transform: translateY(-120%); }
+      to { transform: translateY(320%); }
+    }
+    @media (max-width: 900px) { .barrido { display: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+      .barrido { display: none; }
+    }
+
+    /* columna de avance */
+    .avance {
+      position: fixed; z-index: 64; right: 0; top: var(--barra-alto); bottom: 0; width: 3px;
+      background: rgba(110, 170, 235, .1);
+    }
+    .avance span {
+      display: block; width: 100%; height: 0;
+      background: linear-gradient(180deg, var(--nx-cian), var(--nx-azul));
+      box-shadow: 0 0 12px rgba(70, 192, 216, .8);
+    }
+    @media (max-width: 900px) { .avance { display: none; } }
   </style>
 
   <script>
-    // Aparición progresiva de los bloques marcados con .revelar
-    const objetivos = document.querySelectorAll('.revelar');
-    if (objetivos.length) {
-      const io = new IntersectionObserver(
-        (entradas) => {
-          for (const e of entradas) {
-            if (!e.isIntersecting) continue;
-            (e.target as HTMLElement).classList.add('visible');
-            io.unobserve(e.target);
-          }
-        },
-        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
-      );
-      objetivos.forEach((o, i) => {
-        (o as HTMLElement).style.transitionDelay = `${Math.min(i % 6, 5) * 70}ms`;
-        io.observe(o);
-      });
+    import gsap from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import Lenis from 'lenis';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let lenis: Lenis | null = null;
+
+    // El scroll suave se monta una sola vez: sobrevive a los cambios de página.
+    if (!reducido && !lenis) {
+      lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis!.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
     }
+
+    function montarAnimaciones() {
+      // Al navegar, los ScrollTrigger de la página anterior ya no apuntan a nada.
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+      lenis?.scrollTo(0, { immediate: true });
+
+      const barra = document.getElementById('avance-barra');
+      if (barra) {
+        gsap.set(barra, { height: 0 });
+        gsap.to(barra, {
+          height: '100%',
+          ease: 'none',
+          scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+        });
+      }
+
+      // Entradas: cada .revelar sube al asomarse; los hermanos se escalonan.
+      const grupos = new Map<Element, Element[]>();
+      document.querySelectorAll<HTMLElement>('.revelar').forEach((el) => {
+        const padre = el.parentElement!;
+        if (!grupos.has(padre)) grupos.set(padre, []);
+        grupos.get(padre)!.push(el);
+      });
+
+      for (const [, hijos] of grupos) {
+        gsap.from(hijos, {
+          y: reducido ? 0 : 30,
+          opacity: 0,
+          duration: reducido ? 0 : 0.8,
+          ease: 'power3.out',
+          stagger: reducido ? 0 : 0.08,
+          scrollTrigger: { trigger: hijos[0], start: 'top 88%', once: true },
+        });
+      }
+
+      if (!reducido) {
+        document.querySelectorAll<HTMLElement>('[data-paralaje]').forEach((el) => {
+          gsap.to(el, {
+            yPercent: Number(el.dataset.paralaje),
+            ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+          });
+        });
+      }
+
+      ScrollTrigger.refresh();
+    }
+
+    // Barrido sobre el riel mientras se cambia de página
+    const barrido = document.getElementById('barrido');
+    document.addEventListener('astro:before-preparation', () => barrido?.classList.add('activo'));
+    document.addEventListener('astro:after-swap', () => {
+      setTimeout(() => barrido?.classList.remove('activo'), 480);
+    });
+
+    document.addEventListener('astro:page-load', montarAnimaciones);
+    addEventListener('load', () => ScrollTrigger.refresh());
   </script>
 </body>
 </html>

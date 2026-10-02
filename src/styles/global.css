@@ -104,9 +104,8 @@ h3 { font-size: clamp(19px, 2vw, 22px); letter-spacing: -.015em; }
 .tarjeta:hover { transform: translateY(-4px); box-shadow: var(--sombra-alta); border-color: #c5d8ea; }
 .tarjeta p { color: var(--texto-2); margin-top: 10px; font-size: 15.5px; }
 
-/* Aparición al hacer scroll */
-.revelar { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
-.revelar.visible { opacity: 1; transform: none; }
+/* .revelar lo anima GSAP desde el layout. Sin JS el contenido se ve igual:
+   aquí no se oculta nada, para no dejar la página en blanco si algo falla. */
 
 /* Accesibilidad */
 .solo-lectores {
@@ -118,5 +117,4 @@ h3 { font-size: clamp(19px, 2vw, 22px); letter-spacing: -.015em; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .revelar { opacity: 1; transform: none; }
 }

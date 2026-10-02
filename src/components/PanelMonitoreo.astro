@@ -229,100 +229,106 @@ const eventos = [
 </section>
 
 <script define:vars={{ serie, UMBRAL, M, ancho, alto, maximo, minimo, PUNTOS }}>
-  /* ---------- reloj ---------- */
-  const reloj = document.getElementById('panel-reloj');
-  const tic = () => {
-    reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
-  };
-  tic();
-  setInterval(tic, 1000);
+function montarPanel() {
 
-  /* ---------- dibujo progresivo de la serie ---------- */
-  const trazo = document.getElementById('serie-corriente');
-  if (trazo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const largo = trazo.getTotalLength();
-    trazo.style.strokeDasharray = String(largo);
-    trazo.style.strokeDashoffset = String(largo);
-    new IntersectionObserver((entradas, obs) => {
-      for (const e of entradas) {
-        if (!e.isIntersecting) continue;
-        trazo.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.3,.7,.3,1)';
-        trazo.style.strokeDashoffset = '0';
-        obs.disconnect();
-      }
-    }, { threshold: 0.3 }).observe(trazo);
-  }
-
-  /* ---------- contadores ---------- */
-  const contadores = document.querySelectorAll('.contador');
-  const animar = (el) => {
-    const hasta = parseFloat(el.dataset.hasta);
-    const dec = parseInt(el.dataset.decimales, 10);
-    const inicio = performance.now();
-    const paso = (ahora) => {
-      const t = Math.min(1, (ahora - inicio) / 1100);
-      const suave = 1 - Math.pow(1 - t, 3);
-      el.textContent = (hasta * suave).toFixed(dec);
-      if (t < 1) requestAnimationFrame(paso);
+    /* ---------- reloj ---------- */
+    const reloj = document.getElementById('panel-reloj');
+    const tic = () => {
+      reloj.textContent = new Date().toLocaleTimeString('es-CL', { hour12: false });
     };
-    requestAnimationFrame(paso);
-  };
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    contadores.forEach((el) => {
-      el.textContent = parseFloat(el.dataset.hasta).toFixed(parseInt(el.dataset.decimales, 10));
-    });
-  } else {
-    const obsC = new IntersectionObserver((entradas) => {
-      for (const e of entradas) {
-        if (!e.isIntersecting) continue;
-        animar(e.target);
-        obsC.unobserve(e.target);
-      }
-    }, { threshold: 0.4 });
-    contadores.forEach((el) => obsC.observe(el));
-  }
+    tic();
+    setInterval(tic, 1000);
 
-  /* ---------- cruz y globo ---------- */
-  const svg = document.getElementById('grafico-corriente');
-  const zona = document.getElementById('zona-hover');
-  const cruz = document.getElementById('cruz');
-  const foco = document.getElementById('foco');
-  const globo = document.getElementById('globo');
-  const caja = globo.parentElement;
+    /* ---------- dibujo progresivo de la serie ---------- */
+    const trazo = document.getElementById('serie-corriente');
+    if (trazo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const largo = trazo.getTotalLength();
+      trazo.style.strokeDasharray = String(largo);
+      trazo.style.strokeDashoffset = String(largo);
+      new IntersectionObserver((entradas, obs) => {
+        for (const e of entradas) {
+          if (!e.isIntersecting) continue;
+          trazo.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(.3,.7,.3,1)';
+          trazo.style.strokeDashoffset = '0';
+          obs.disconnect();
+        }
+      }, { threshold: 0.3 }).observe(trazo);
+    }
 
-  const posX = (i) => M.izquierda + (i / (PUNTOS - 1)) * ancho;
-  const posY = (v) => M.arriba + alto - ((v - minimo) / (maximo - minimo)) * alto;
+    /* ---------- contadores ---------- */
+    const contadores = document.querySelectorAll('.contador');
+    const animar = (el) => {
+      const hasta = parseFloat(el.dataset.hasta);
+      const dec = parseInt(el.dataset.decimales, 10);
+      const inicio = performance.now();
+      const paso = (ahora) => {
+        const t = Math.min(1, (ahora - inicio) / 1100);
+        const suave = 1 - Math.pow(1 - t, 3);
+        el.textContent = (hasta * suave).toFixed(dec);
+        if (t < 1) requestAnimationFrame(paso);
+      };
+      requestAnimationFrame(paso);
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      contadores.forEach((el) => {
+        el.textContent = parseFloat(el.dataset.hasta).toFixed(parseInt(el.dataset.decimales, 10));
+      });
+    } else {
+      const obsC = new IntersectionObserver((entradas) => {
+        for (const e of entradas) {
+          if (!e.isIntersecting) continue;
+          animar(e.target);
+          obsC.unobserve(e.target);
+        }
+      }, { threshold: 0.4 });
+      contadores.forEach((el) => obsC.observe(el));
+    }
 
-  function mover(ev) {
-    const r = svg.getBoundingClientRect();
-    const sx = ((ev.clientX - r.left) / r.width) * svg.viewBox.baseVal.width;
-    const i = Math.max(0, Math.min(PUNTOS - 1, Math.round(((sx - M.izquierda) / ancho) * (PUNTOS - 1))));
-    const p = serie[i];
+    /* ---------- cruz y globo ---------- */
+    const svg = document.getElementById('grafico-corriente');
+    const zona = document.getElementById('zona-hover');
+    const cruz = document.getElementById('cruz');
+    const foco = document.getElementById('foco');
+    const globo = document.getElementById('globo');
+    const caja = globo.parentElement;
 
-    cruz.setAttribute('x1', posX(i)); cruz.setAttribute('x2', posX(i));
-    cruz.classList.remove('oculto');
-    foco.setAttribute('cx', posX(i)); foco.setAttribute('cy', posY(p.valor));
-    foco.classList.remove('oculto');
+    const posX = (i) => M.izquierda + (i / (PUNTOS - 1)) * ancho;
+    const posY = (v) => M.arriba + alto - ((v - minimo) / (maximo - minimo)) * alto;
 
-    const rc = caja.getBoundingClientRect();
-    globo.hidden = false;
-    globo.querySelector('.globo__hora').textContent = p.hora;
-    globo.querySelector('.globo__valor').textContent = `${p.valor.toFixed(1)} A`;
-    globo.classList.toggle('globo--alto', p.valor > UMBRAL);
-    const gx = (posX(i) / svg.viewBox.baseVal.width) * rc.width;
-    globo.style.left = `${Math.min(Math.max(gx, 60), rc.width - 60)}px`;
-    globo.style.top = `${(posY(p.valor) / svg.viewBox.baseVal.height) * rc.height - 16}px`;
-  }
+    function mover(ev) {
+      const r = svg.getBoundingClientRect();
+      const sx = ((ev.clientX - r.left) / r.width) * svg.viewBox.baseVal.width;
+      const i = Math.max(0, Math.min(PUNTOS - 1, Math.round(((sx - M.izquierda) / ancho) * (PUNTOS - 1))));
+      const p = serie[i];
 
-  function salir() {
-    cruz.classList.add('oculto');
-    foco.classList.add('oculto');
-    globo.hidden = true;
-  }
+      cruz.setAttribute('x1', posX(i)); cruz.setAttribute('x2', posX(i));
+      cruz.classList.remove('oculto');
+      foco.setAttribute('cx', posX(i)); foco.setAttribute('cy', posY(p.valor));
+      foco.classList.remove('oculto');
 
-  zona.addEventListener('pointermove', mover);
-  zona.addEventListener('pointerleave', salir);
-  zona.addEventListener('pointerdown', mover);
+      const rc = caja.getBoundingClientRect();
+      globo.hidden = false;
+      globo.querySelector('.globo__hora').textContent = p.hora;
+      globo.querySelector('.globo__valor').textContent = `${p.valor.toFixed(1)} A`;
+      globo.classList.toggle('globo--alto', p.valor > UMBRAL);
+      const gx = (posX(i) / svg.viewBox.baseVal.width) * rc.width;
+      globo.style.left = `${Math.min(Math.max(gx, 60), rc.width - 60)}px`;
+      globo.style.top = `${(posY(p.valor) / svg.viewBox.baseVal.height) * rc.height - 16}px`;
+    }
+
+    function salir() {
+      cruz.classList.add('oculto');
+      foco.classList.add('oculto');
+      globo.hidden = true;
+    }
+
+    zona.addEventListener('pointermove', mover);
+    zona.addEventListener('pointerleave', salir);
+    zona.addEventListener('pointerdown', mover);
+
+}
+
+document.addEventListener('astro:page-load', montarPanel);
 </script>
 
 <style>

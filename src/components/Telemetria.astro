@@ -51,17 +51,28 @@ const lecturas = [
 </style>
 
 <script>
-  // Fluctuación suave para que las lecturas se sientan vivas.
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const valores = document.querySelectorAll<HTMLElement>('#cinta-pista b');
-    setInterval(() => {
-      valores.forEach((el) => {
-        const base = parseFloat(el.dataset.base ?? '');
-        if (!Number.isFinite(base) || base === 0) return;
-        const decimales = (el.dataset.base ?? '').split('.')[1]?.length ?? 0;
-        const ruido = base * (Math.random() - 0.5) * 0.012;
-        el.textContent = `${(base + ruido).toFixed(decimales)} ${el.dataset.unidad ?? ''}`;
-      });
-    }, 1700);
-  }
+let montado = false;
+
+function montarCinta() {
+  if (montado) return;
+  montado = true;
+
+
+    // Fluctuación suave para que las lecturas se sientan vivas.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const valores = document.querySelectorAll<HTMLElement>('#cinta-pista b');
+      setInterval(() => {
+        valores.forEach((el) => {
+          const base = parseFloat(el.dataset.base ?? '');
+          if (!Number.isFinite(base) || base === 0) return;
+          const decimales = (el.dataset.base ?? '').split('.')[1]?.length ?? 0;
+          const ruido = base * (Math.random() - 0.5) * 0.012;
+          el.textContent = `${(base + ruido).toFixed(decimales)} ${el.dataset.unidad ?? ''}`;
+        });
+      }, 1700);
+    }
+
+}
+
+document.addEventListener('astro:page-load', montarCinta);
 </script>

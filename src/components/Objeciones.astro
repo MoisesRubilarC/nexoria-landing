@@ -1,0 +1,123 @@
+---
+/**
+ * Las preguntas que de verdad frenan la compra en una planta.
+ * Presentadas como una consola de diagnóstico, no como un FAQ corporativo.
+ *
+ * TODO comercial: confirmar plazos y política de contrato con Christian
+ * y Eduardo antes de publicar.
+ */
+const preguntas = [
+  {
+    q: '¿Sirve con los equipos que ya tengo?',
+    a: 'Esa es la idea. No vendemos hardware que reemplace lo tuyo: nos conectamos a los variadores y controladores que ya están instalados. En el levantamiento revisamos marca y modelo de cada equipo y te decimos de frente qué se puede leer y qué no.',
+  },
+  {
+    q: '¿Hay que detener la línea para instalarlo?',
+    a: 'No. La conexión se hace sin interrumpir la producción. Si algún equipo puntual lo requiere, lo coordinamos para una parada que ya tengas programada.',
+  },
+  {
+    q: '¿Cuánto demora estar operando?',
+    a: 'Un primer equipo puede estar entregando datos el mismo día de la visita. Dejar la planta completa con tableros y alertas afinadas toma algunas semanas, según cuántos equipos sean.',
+  },
+  {
+    q: '¿Los datos quedan amarrados a ustedes?',
+    a: 'No. Tu información es tuya y es exportable cuando quieras, en Excel o por API. Si algún día decides irte, te vas con todo el histórico.',
+  },
+  {
+    q: '¿Necesito gente dedicada a esto?',
+    a: 'No. La plataforma está hecha para que la use el equipo de mantención que ya tienes, sin un analista de datos al lado. Capacitamos a tu gente como parte de la puesta en marcha.',
+  },
+  {
+    q: '¿Y si mi planta no tiene buena conexión?',
+    a: 'Es lo habitual en terreno y está contemplado. El sistema tolera cortes de enlace y sincroniza cuando vuelve, sin perder lecturas.',
+  },
+];
+---
+
+<section class="obj">
+  <div class="contenedor">
+    <div class="obj__rejilla">
+      <div class="obj__lado revelar">
+        <span class="sobretitulo">Antes de decidir</span>
+        <h2>Lo que <span class="grad">siempre</span> nos preguntan</h2>
+        <p class="bajada">
+          Las dudas razonables de cualquiera que lleve una planta. Respondidas sin
+          rodeos, porque preferimos decirte que no antes de venderte algo que no te sirve.
+        </p>
+        <a href="/contacto/" class="btn btn--primario" style="margin-top:28px">
+          Hacer otra pregunta
+        </a>
+      </div>
+
+      <div class="obj__lista">
+        {preguntas.map((p, i) => (
+          <details class="obj__item revelar" name="objeciones" open={i === 0}>
+            <summary>
+              <span class="obj__codigo" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="obj__q">{p.q}</span>
+              <span class="obj__mas" aria-hidden="true"></span>
+            </summary>
+            <div class="obj__a"><p>{p.a}</p></div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .obj { background: var(--nx-noche); color: #a9b6d4; padding: clamp(64px, 9vw, 112px) 0; }
+  .obj__rejilla { display: grid; gap: clamp(32px, 5vw, 56px); grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: start; }
+
+  .obj__lado :global(h2) { color: #fff; }
+  .obj__lado :global(.bajada) { color: #a9b6d4; }
+  .obj__lado :global(.grad) {
+    background: linear-gradient(100deg, #9edcf2, #46C0D8 50%, #7fb6ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .obj__lista { display: flex; flex-direction: column; }
+
+  .obj__item { border-bottom: 1px solid rgba(110, 170, 235, .16); }
+  .obj__item:first-child { border-top: 1px solid rgba(110, 170, 235, .16); }
+
+  .obj__item summary {
+    display: flex; align-items: center; gap: 16px;
+    padding: 20px 4px; cursor: pointer; list-style: none;
+    transition: color .2s ease;
+  }
+  .obj__item summary::-webkit-details-marker { display: none; }
+  .obj__item summary:hover { color: #fff; }
+
+  .obj__codigo {
+    flex: none; font-size: 11.5px; font-weight: 700; letter-spacing: .1em;
+    color: var(--nx-cian); font-variant-numeric: tabular-nums;
+  }
+  .obj__q { flex: 1; font-size: 16.5px; font-weight: 600; color: #e2e8f0; letter-spacing: -.015em; }
+
+  .obj__mas { position: relative; flex: none; width: 15px; height: 15px; }
+  .obj__mas::before, .obj__mas::after {
+    content: ''; position: absolute; inset-block: 50%; inset-inline: 0;
+    height: 2px; border-radius: 2px; background: var(--nx-cian);
+    transition: transform .3s cubic-bezier(.2, .7, .2, 1);
+  }
+  .obj__mas::after { transform: rotate(90deg); }
+  .obj__item[open] .obj__mas::after { transform: rotate(0deg); }
+
+  .obj__a { overflow: hidden; }
+  .obj__a p {
+    padding: 0 4px 22px 43px; max-width: 62ch;
+    font-size: 15.5px; color: #8e9cbe;
+  }
+  .obj__item[open] .obj__a { animation: desplegar .35s cubic-bezier(.2, .7, .2, 1); }
+  @keyframes desplegar {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 900px) {
+    .obj__rejilla { grid-template-columns: 1fr; }
+    .obj__a p { padding-left: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .obj__item[open] .obj__a { animation: none; } }
+</style>

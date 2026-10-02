@@ -1,0 +1,185 @@
+---
+import { getCollection } from 'astro:content';
+import Icono from './Icono.astro';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden - b.data.orden);
+---
+
+<section class="carr" id="carr">
+  <div class="carr__pista" id="carr-pista">
+    <!-- Panel de entrada: queda fijo mientras pasan las tarjetas -->
+    <div class="carr__intro">
+      <span class="carr__num" aria-hidden="true">
+        <b id="carr-indice">01</b> / {String(servicios.length).padStart(2, '0')}
+      </span>
+      <h2>Lo que<br /><span class="carr__grad">hacemos</span></h2>
+      <p>
+        No vendemos una licencia y te deseamos suerte. Entramos a la planta, conectamos
+        los equipos que ya tienes y nos quedamos hasta que tu gente lo usa sola.
+      </p>
+      <a href="/servicios/" class="btn btn--fantasma">Ver en detalle</a>
+      <span class="carr__pista-guia" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+        Sigue bajando
+      </span>
+    </div>
+
+    {servicios.map((s, i) => (
+      <article class="carr__tarjeta" data-indice={i + 1}>
+        <span class="carr__orden" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+        <span class="carr__icono"><Icono nombre={s.data.icono} tam={26} /></span>
+        <h3>{s.data.titulo}</h3>
+        <p>{s.data.resumen}</p>
+        {s.data.puntos.length > 0 && (
+          <ul>
+            {s.data.puntos.slice(0, 3).map((p) => <li>{p}</li>)}
+          </ul>
+        )}
+        <a href={`/servicios/${s.id}/`} class="carr__ver">
+          Ver servicio
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+        </a>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .carr { background: var(--nx-noche); color: #dbe4f5; overflow: hidden; }
+
+  .carr__pista {
+    display: flex; align-items: center; gap: 22px;
+    padding: clamp(56px, 8vw, 96px) clamp(20px, 4vw, 48px);
+    width: max-content;
+  }
+
+  .carr__intro { width: min(84vw, 400px); flex: none; padding-right: 20px; }
+  .carr__num {
+    display: block; font-size: 12.5px; letter-spacing: .16em; color: #5d6a8c;
+    font-weight: 700; margin-bottom: 16px;
+  }
+  .carr__num b { color: var(--nx-cian); font-size: 15px; }
+  .carr__intro h2 { color: #fff; font-size: clamp(34px, 5vw, 52px); }
+  .carr__grad {
+    background: linear-gradient(100deg, #9edcf2, #46C0D8 50%, #7fb6ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .carr__intro p { margin: 20px 0 26px; color: #a9b6d4; font-size: 16.5px; max-width: 38ch; }
+  .carr__pista-guia {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 28px;
+    font-size: 11.5px; letter-spacing: .13em; text-transform: uppercase; color: #5d6a8c; font-weight: 650;
+  }
+  .carr__pista-guia svg { animation: empujar 1.8s ease-in-out infinite; }
+  @keyframes empujar { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
+  .carr__tarjeta {
+    position: relative; flex: none;
+    width: min(80vw, 340px); min-height: 400px;
+    display: flex; flex-direction: column;
+    padding: 30px 26px;
+    border: 1px solid rgba(110, 170, 235, .18);
+    border-radius: 16px;
+    background: linear-gradient(165deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .015));
+    backdrop-filter: blur(6px);
+    transition: border-color .3s ease, transform .3s ease, background .3s ease;
+  }
+  .carr__tarjeta:hover {
+    border-color: rgba(70, 192, 216, .5);
+    transform: translateY(-5px);
+    background: linear-gradient(165deg, rgba(70, 192, 216, .1), rgba(255, 255, 255, .02));
+  }
+
+  .carr__orden {
+    position: absolute; top: 22px; right: 24px;
+    font-size: 42px; font-weight: 800; line-height: 1;
+    color: rgba(255, 255, 255, .055); letter-spacing: -.04em;
+  }
+  .carr__icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 52px; height: 52px; border-radius: 14px; margin-bottom: 20px;
+    background: linear-gradient(140deg, rgba(70, 192, 216, .2), rgba(45, 102, 171, .18));
+    border: 1px solid rgba(70, 192, 216, .26);
+    color: var(--nx-cian);
+  }
+  .carr__tarjeta h3 { color: #fff; font-size: 21px; }
+  .carr__tarjeta p { margin-top: 12px; color: #a9b6d4; font-size: 15px; }
+  .carr__tarjeta ul { list-style: none; margin-top: 18px; }
+  .carr__tarjeta li {
+    position: relative; padding-left: 20px; margin-top: 9px;
+    font-size: 13.5px; color: #8e9cbe;
+  }
+  .carr__tarjeta li::before {
+    content: ''; position: absolute; left: 0; top: 7px;
+    width: 10px; height: 6px; border-left: 2px solid var(--nx-cian);
+    border-bottom: 2px solid var(--nx-cian); transform: rotate(-45deg);
+  }
+  .carr__ver {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 22px;
+    font-size: 14px; font-weight: 650; color: var(--nx-cian);
+  }
+  .carr__ver svg { transition: transform .2s ease; }
+  .carr__tarjeta:hover .carr__ver svg { transform: translateX(4px); }
+
+  @media (max-width: 900px) {
+    .carr__pista { flex-direction: column; width: auto; align-items: stretch; gap: 16px; }
+    .carr__intro, .carr__tarjeta { width: auto; }
+    .carr__tarjeta { min-height: 0; }
+    .carr__pista-guia { display: none; }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+function montarCarrusel() {
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const seccion = document.getElementById('carr');
+    const pista = document.getElementById('carr-pista');
+    const indice = document.getElementById('carr-indice');
+
+    // El desplazamiento horizontal solo tiene sentido en pantallas anchas;
+    // en móvil las tarjetas se apilan y no se fija nada.
+    const anchaYConMovimiento = () =>
+      window.innerWidth > 900 && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (seccion && pista && anchaYConMovimiento()) {
+      const recorrido = () => pista.scrollWidth - window.innerWidth + 48;
+
+      const tl = gsap.to(pista, {
+        x: () => -recorrido(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: seccion,
+          start: 'top top',
+          end: () => '+=' + recorrido(),
+          pin: true,
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+        },
+      });
+
+      // Contador de la tarjeta que va pasando
+      if (indice) {
+        const tarjetas = pista.querySelectorAll<HTMLElement>('.carr__tarjeta');
+        tarjetas.forEach((t) => {
+          ScrollTrigger.create({
+            trigger: t,
+            containerAnimation: tl,
+            start: 'left 60%',
+            end: 'right 60%',
+            onToggle: ({ isActive }) => {
+              if (isActive) indice.textContent = String(t.dataset.indice).padStart(2, '0');
+            },
+          });
+        });
+      }
+    }
+
+}
+
+document.addEventListener('astro:page-load', montarCarrusel);
+</script>

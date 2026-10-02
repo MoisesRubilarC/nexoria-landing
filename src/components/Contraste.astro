@@ -1,0 +1,141 @@
+---
+/**
+ * El argumento comercial central: qué pasa hoy sin monitoreo y qué pasa con él.
+ * Va antes que cualquier lista de características, porque el comprador no
+ * compra funciones: compra no volver a vivir la parada.
+ */
+const hoy = [
+  { t: '03:40', d: 'El variador lleva semanas con el disipador más caliente. Nadie lo ve.' },
+  { t: '06:12', d: 'Sobrecorriente en el arranque del turno. Queda registrado solo dentro del equipo.' },
+  { t: '09:27', d: 'El equipo se detiene. Recién ahí alguien se entera.' },
+  { t: '09:28', d: 'Empieza la búsqueda: ¿qué pasó?, ¿desde cuándo?, ¿a quién llamamos?' },
+  { t: '14:50', d: 'Línea detenida cinco horas. El informe del turno se escribe de memoria.' },
+];
+
+const conNexoria = [
+  { t: 'Hace 3 semanas', d: 'La plataforma detecta que el disipador sube 4 °C sobre su línea base.' },
+  { t: 'Hace 3 semanas', d: 'Llega la alerta al jefe de mantención, con el histórico adjunto.' },
+  { t: 'Hace 2 semanas', d: 'Se programa la intervención en la parada planificada del sábado.' },
+  { t: 'Sábado', d: 'Se cambia el ventilador en 40 minutos, sin detener producción entre semana.' },
+  { t: 'Hoy', d: 'La línea sigue corriendo. La parada de cinco horas nunca ocurrió.' },
+];
+---
+
+<section class="contraste">
+  <div class="contenedor">
+    <div class="cabecera cabecera--centro revelar">
+      <span class="sobretitulo">El costo de no saber</span>
+      <h2>La misma falla, <span class="grad">dos finales</span></h2>
+      <p class="bajada">
+        Un equipo casi nunca falla de golpe. Avisa semanas antes, en los datos que ya
+        está generando. La diferencia está en si alguien los está mirando.
+      </p>
+    </div>
+
+    <div class="columnas">
+      <article class="col col--hoy revelar">
+        <header>
+          <span class="col__sello col__sello--mal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            Sin monitoreo
+          </span>
+          <h3>Cómo pasa hoy</h3>
+        </header>
+        <ol>
+          {hoy.map((p) => (
+            <li>
+              <span class="col__hora">{p.t}</span>
+              <span class="col__texto">{p.d}</span>
+            </li>
+          ))}
+        </ol>
+        <footer class="col__cierre col__cierre--mal">
+          <strong>5 horas</strong> de línea detenida, sin aviso previo
+        </footer>
+      </article>
+
+      <article class="col col--nexoria revelar">
+        <header>
+          <span class="col__sello col__sello--bien">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7" /></svg>
+            Con Nexoria
+          </span>
+          <h3>Cómo podría pasar</h3>
+        </header>
+        <ol>
+          {conNexoria.map((p) => (
+            <li>
+              <span class="col__hora">{p.t}</span>
+              <span class="col__texto">{p.d}</span>
+            </li>
+          ))}
+        </ol>
+        <footer class="col__cierre col__cierre--bien">
+          <strong>40 minutos</strong> en parada ya programada
+        </footer>
+      </article>
+    </div>
+
+    <p class="nota revelar">
+      El relato es ilustrativo. El mecanismo no: la desviación sostenida de una variable
+      frente a su propio comportamiento normal es la señal más común antes de una falla.
+    </p>
+  </div>
+</section>
+
+<style>
+  .contraste { background: var(--fondo-2); border-block: 1px solid var(--borde); padding: clamp(64px, 9vw, 112px) 0; }
+
+  .columnas { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
+
+  .col {
+    display: flex; flex-direction: column;
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 28px; box-shadow: var(--sombra);
+  }
+  .col--nexoria { border-color: rgba(70, 192, 216, .5); box-shadow: var(--sombra-alta); }
+
+  .col header { margin-bottom: 22px; }
+  .col h3 { margin-top: 12px; font-size: 20px; }
+  .col__sello {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 12px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .col__sello--mal { background: #fdecea; color: #a5342a; }
+  .col__sello--bien { background: rgba(70, 192, 216, .16); color: #10697d; }
+
+  .col ol { list-style: none; position: relative; padding-left: 22px; }
+  .col ol::before {
+    content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px;
+    background: var(--fondo-3);
+  }
+  .col--nexoria ol::before { background: linear-gradient(180deg, var(--nx-cian), var(--nx-azul)); }
+
+  .col li { position: relative; padding-bottom: 20px; }
+  .col li:last-child { padding-bottom: 0; }
+  .col li::before {
+    content: ''; position: absolute; left: -22px; top: 6px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--texto-3);
+  }
+  .col--nexoria li::before { border-color: var(--nx-cian); }
+  .col--nexoria li:last-child::before { background: var(--nx-cian); box-shadow: 0 0 0 4px rgba(70, 192, 216, .2); }
+
+  .col__hora {
+    display: block; font-size: 11.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--texto-3);
+  }
+  .col--nexoria .col__hora { color: var(--nx-azul); }
+  .col__texto { display: block; margin-top: 4px; font-size: 15px; color: var(--texto-2); }
+
+  .col__cierre {
+    margin-top: 26px; padding: 14px 18px; border-radius: var(--radio-sm);
+    font-size: 14.5px;
+  }
+  .col__cierre strong { font-size: 17px; }
+  .col__cierre--mal { background: #fdecea; color: #a5342a; }
+  .col__cierre--bien { background: rgba(70, 192, 216, .12); color: #10697d; }
+
+  .nota { margin-top: 26px; text-align: center; font-size: 13.5px; color: var(--texto-3); max-width: 70ch; margin-inline: auto; }
+</style>

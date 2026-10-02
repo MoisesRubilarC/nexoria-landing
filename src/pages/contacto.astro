@@ -147,74 +147,80 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
 </style>
 
 <script>
-  const form = document.getElementById('form-cotizacion') as HTMLFormElement;
-  const boton = document.getElementById('btn-enviar') as HTMLButtonElement;
-  const aviso = document.getElementById('aviso') as HTMLParagraphElement;
-  const endpoint = form.dataset.endpoint ?? '';
+function montarFormulario() {
 
-  function mostrar(texto: string, tipo: 'ok' | 'error') {
-    aviso.textContent = texto;
-    aviso.className = `aviso ${tipo}`;
-    aviso.hidden = false;
-  }
+    const form = document.getElementById('form-cotizacion') as HTMLFormElement;
+    const boton = document.getElementById('btn-enviar') as HTMLButtonElement;
+    const aviso = document.getElementById('aviso') as HTMLParagraphElement;
+    const endpoint = form.dataset.endpoint ?? '';
 
-  // Respaldo: si el Worker todavía no está configurado, abrimos el correo.
-  function porCorreo(datos: FormData) {
-    const cuerpo = [
-      `Nombre: ${datos.get('nombre')}`,
-      `Empresa: ${datos.get('empresa')}`,
-      `Correo: ${datos.get('correo')}`,
-      `Teléfono: ${datos.get('telefono') || '—'}`,
-      `Interés: ${datos.get('servicio') || '—'}`,
-      '',
-      String(datos.get('mensaje') ?? ''),
-    ].join('\n');
-    location.href =
-      `mailto:contacto@nexoriachile.com?subject=${encodeURIComponent('Solicitud de cotización — ' + datos.get('empresa'))}` +
-      `&body=${encodeURIComponent(cuerpo)}`;
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    // Validación propia para poder marcar los campos y dar un mensaje en español.
-    let primeroInvalido: HTMLElement | null = null;
-    for (const el of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]')) {
-      const malo = !el.checkValidity();
-      el.setAttribute('aria-invalid', String(malo));
-      if (malo && !primeroInvalido) primeroInvalido = el;
-    }
-    if (primeroInvalido) {
-      mostrar('Revisa los campos marcados: faltan datos o el correo no es válido.', 'error');
-      primeroInvalido.focus();
-      return;
+    function mostrar(texto: string, tipo: 'ok' | 'error') {
+      aviso.textContent = texto;
+      aviso.className = `aviso ${tipo}`;
+      aviso.hidden = false;
     }
 
-    const datos = new FormData(form);
-    if (datos.get('sitio_web')) return; // bot
-
-    if (!endpoint) { porCorreo(datos); return; }
-
-    boton.disabled = true;
-    const textoOriginal = boton.innerHTML;
-    boton.textContent = 'Enviando…';
-    aviso.hidden = true;
-
-    try {
-      const r = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.fromEntries(datos)),
-      });
-      if (!r.ok) throw new Error(String(r.status));
-      form.reset();
-      mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
-    } catch {
-      mostrar('No pudimos enviar el formulario. Te abrimos el correo para que lo mandes directo.', 'error');
-      porCorreo(datos);
-    } finally {
-      boton.disabled = false;
-      boton.innerHTML = textoOriginal;
+    // Respaldo: si el Worker todavía no está configurado, abrimos el correo.
+    function porCorreo(datos: FormData) {
+      const cuerpo = [
+        `Nombre: ${datos.get('nombre')}`,
+        `Empresa: ${datos.get('empresa')}`,
+        `Correo: ${datos.get('correo')}`,
+        `Teléfono: ${datos.get('telefono') || '—'}`,
+        `Interés: ${datos.get('servicio') || '—'}`,
+        '',
+        String(datos.get('mensaje') ?? ''),
+      ].join('\n');
+      location.href =
+        `mailto:contacto@nexoriachile.com?subject=${encodeURIComponent('Solicitud de cotización — ' + datos.get('empresa'))}` +
+        `&body=${encodeURIComponent(cuerpo)}`;
     }
-  });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validación propia para poder marcar los campos y dar un mensaje en español.
+      let primeroInvalido: HTMLElement | null = null;
+      for (const el of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]')) {
+        const malo = !el.checkValidity();
+        el.setAttribute('aria-invalid', String(malo));
+        if (malo && !primeroInvalido) primeroInvalido = el;
+      }
+      if (primeroInvalido) {
+        mostrar('Revisa los campos marcados: faltan datos o el correo no es válido.', 'error');
+        primeroInvalido.focus();
+        return;
+      }
+
+      const datos = new FormData(form);
+      if (datos.get('sitio_web')) return; // bot
+
+      if (!endpoint) { porCorreo(datos); return; }
+
+      boton.disabled = true;
+      const textoOriginal = boton.innerHTML;
+      boton.textContent = 'Enviando…';
+      aviso.hidden = true;
+
+      try {
+        const r = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(datos)),
+        });
+        if (!r.ok) throw new Error(String(r.status));
+        form.reset();
+        mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
+      } catch {
+        mostrar('No pudimos enviar el formulario. Te abrimos el correo para que lo mandes directo.', 'error');
+        porCorreo(datos);
+      } finally {
+        boton.disabled = false;
+        boton.innerHTML = textoOriginal;
+      }
+    });
+
+}
+
+document.addEventListener('astro:page-load', montarFormulario);
 </script>
