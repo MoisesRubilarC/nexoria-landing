@@ -1,0 +1,330 @@
+---
+/**
+ * Recreación fiel del reporte de equipo de AMPROD.
+ *
+ * La geometría del arco, el degradado y los anchos de trazo son los mismos de
+ * `GaugeCard.vue` en la plataforma, para que lo que se ve aquí sea realmente
+ * lo que el cliente va a usar. Los valores son los del Compresor 10 en marcha.
+ */
+
+interface Props {
+  flotante?: boolean;
+}
+const { flotante = false } = Astro.props;
+
+// Arco de 220°, centro (100,95) radio 78 — idéntico al de la plataforma.
+const ARCO = 'M 26.7 121.7 A 78 78 0 1 1 173.3 121.7';
+
+const gauges = [
+  { etiqueta: 'Frecuencia', valor: 49.8, unidad: 'Hz', min: 0, max: 60, icono: 'onda' },
+  { etiqueta: 'Velocidad', valor: 2820, unidad: 'rpm', min: 0, max: 4000, icono: 'giro' },
+  { etiqueta: 'Voltaje motor', valor: 375, unidad: 'V', min: 0, max: 500, icono: 'rayo' },
+  { etiqueta: 'Corriente', valor: 412, unidad: 'A', min: 0, max: 1000, icono: 'pulso' },
+  { etiqueta: 'Torque', valor: 68, unidad: '%', min: 0, max: 150, icono: 'barras' },
+  { etiqueta: 'Temp. disipador', valor: 41, unidad: '°C', min: 20, max: 100, icono: 'termo' },
+];
+
+const pct = (v: number, min: number, max: number) =>
+  Math.max(2, Math.min(100, ((v - min) / (max - min)) * 100));
+
+const iconos: Record<string, string> = {
+  onda: '<path d="M2 12h3l2.5 7 4-14 2.5 7H22"/>',
+  giro: '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>',
+  rayo: '<path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z"/>',
+  pulso: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+  barras: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  termo: '<path d="M14 4.5V14a4 4 0 1 1-4 0V4.5a2 2 0 1 1 4 0Z"/>',
+};
+
+const pestanas = ['Resumen', 'Tendencias', 'Alarmas', 'Eventos', 'Histórico'];
+---
+
+<div class:list={['vista', { 'vista--flotante': flotante }]}>
+  <!-- Barra de la aplicación -->
+  <div class="vista__app">
+    <span class="vista__titulo">Reporte de equipo</span>
+    <span class="vista__usuario">
+      <i class="vista__avatar">MC</i>
+      <span>Super Admin</span>
+    </span>
+  </div>
+
+  <!-- Ruta del equipo -->
+  <div class="vista__ruta">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"/></svg>
+    <span>Planta Tomé</span>
+    <b>·</b>
+    <span>Compresor 10</span>
+    <code>ID: NXR_DEMO_CA6</code>
+  </div>
+
+  <!-- Fichas de cabecera -->
+  <div class="fichas">
+    <article class="ficha">
+      <img src="/img/equipos/danfoss-fc102.png" alt="Variador de frecuencia" width="437" height="727" loading="lazy" />
+      <div>
+        <span class="ficha__tipo">Variador de frecuencia</span>
+        <dl>
+          <div><dt>Modelo</dt><dd>Danfoss FC-102</dd></div>
+          <div><dt>Potencia</dt><dd>450 kW</dd></div>
+          <div><dt>Voltaje</dt><dd>400 V</dd></div>
+        </dl>
+      </div>
+    </article>
+
+    <article class="ficha">
+      <img src="/img/equipos/motor.png" alt="Motor eléctrico" width="675" height="431" loading="lazy" class="ficha__motor" />
+      <div>
+        <span class="ficha__tipo">Motor · datos de placa</span>
+        <dl>
+          <div><dt>Potencia</dt><dd>405 kW</dd></div>
+          <div><dt>Corriente</dt><dd>692 A</dd></div>
+          <div><dt>Velocidad</dt><dd>3.000 rpm</dd></div>
+        </dl>
+      </div>
+    </article>
+
+    <article class="ficha ficha--estado">
+      <span class="escudo" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v6c0 4.4-3.1 8.3-7.5 9.5C7.6 20.3 4.5 16.4 4.5 12V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+      </span>
+      <div>
+        <span class="ficha__tipo">Estado del variador</span>
+        <strong class="estado-ok">Operación normal</strong>
+        <span class="ficha__pie">Sin alarmas activas</span>
+      </div>
+    </article>
+  </div>
+
+  <!-- Pestañas -->
+  <nav class="pestanas" aria-hidden="true">
+    {pestanas.map((p, i) => (
+      <span class:list={['pestana', { 'pestana--activa': i === 0 }]}>{p}</span>
+    ))}
+  </nav>
+
+  <!-- Gauges -->
+  <div class="seccion-titulo" aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+    Variables en tiempo real
+  </div>
+
+  <div class="gauges">
+    {gauges.map((g, i) => (
+      <article class="gauge">
+        <header>
+          <span class="gauge__icono">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={iconos[g.icono]} />
+          </span>
+          <span class="gauge__etiqueta">{g.etiqueta}</span>
+        </header>
+
+        <div class="gauge__caja">
+          <svg viewBox="0 0 200 142" class="gauge__svg">
+            <defs>
+              <linearGradient id={`grad-${i}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#22c55e" />
+                <stop offset="50%" stop-color="#84cc16" />
+                <stop offset="70%" stop-color="#eab308" />
+                <stop offset="85%" stop-color="#f97316" />
+                <stop offset="100%" stop-color="#ef4444" />
+              </linearGradient>
+            </defs>
+            <path d={ARCO} pathLength="100" fill="none" stroke="#1e293b" stroke-width="11" stroke-linecap="round" />
+            <path
+              class="gauge__arco"
+              d={ARCO}
+              pathLength="100"
+              fill="none"
+              stroke={`url(#grad-${i})`}
+              stroke-width="11"
+              stroke-linecap="round"
+              stroke-dasharray="0 100"
+              data-pct={pct(g.valor, g.min, g.max).toFixed(1)}
+            />
+          </svg>
+          <div class="gauge__centro">
+            <b class="gauge__valor" data-hasta={g.valor} data-decimales={Number.isInteger(g.valor) ? 0 : 1}>0</b>
+            <span class="gauge__unidad">{g.unidad}</span>
+          </div>
+        </div>
+
+        <footer><span>Min: {g.min}</span><span>Max: {g.max}</span></footer>
+      </article>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Paleta propia de la plataforma (slate de Tailwind), para que se vea idéntica */
+  .vista {
+    --sl-900: #0f172a;
+    --sl-800: #1e293b;
+    --sl-700: #334155;
+    --sl-600: #475569;
+    --sl-500: #64748b;
+    --sl-400: #94a3b8;
+
+    background: var(--sl-900);
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 14px;
+    overflow: hidden;
+    font-size: 13px;
+    color: var(--sl-400);
+    box-shadow: 0 50px 100px -40px rgba(0, 0, 0, .95), 0 0 0 1px rgba(255, 255, 255, .03);
+  }
+  .vista--flotante { animation: flotar-vista 9s ease-in-out infinite alternate; }
+  @keyframes flotar-vista { to { transform: translateY(-10px); } }
+
+  .vista__app {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 16px; background: #0b1220;
+    border-bottom: 1px solid rgba(148, 163, 184, .14);
+  }
+  .vista__titulo { color: #e2e8f0; font-weight: 650; font-size: 13.5px; }
+  .vista__usuario { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--sl-500); }
+  .vista__avatar {
+    font-style: normal; display: grid; place-items: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--nx-azul); color: #fff; font-size: 10.5px; font-weight: 700;
+  }
+
+  .vista__ruta {
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+    padding: 10px 16px; font-size: 12px; color: var(--sl-400);
+    border-bottom: 1px solid rgba(148, 163, 184, .1);
+  }
+  .vista__ruta b { color: var(--sl-600); }
+  .vista__ruta code {
+    font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, .1);
+    padding: 2px 8px; border-radius: 5px;
+  }
+
+  /* fichas */
+  .fichas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; padding: 14px 16px; }
+  .ficha {
+    display: flex; align-items: center; gap: 13px;
+    background: var(--sl-800); border: 1px solid rgba(148, 163, 184, .14);
+    border-radius: 11px; padding: 13px;
+  }
+  .ficha img { width: 42px; height: auto; flex: none; object-fit: contain; }
+  .ficha__motor { width: 58px; }
+  .ficha__tipo {
+    display: block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sl-500); font-weight: 700; margin-bottom: 7px;
+  }
+  .ficha dl { display: flex; flex-direction: column; gap: 3px; }
+  .ficha dl > div { display: flex; justify-content: space-between; gap: 14px; }
+  .ficha dt { font-size: 11.5px; color: var(--sl-500); }
+  .ficha dd { font-size: 11.5px; color: #e2e8f0; font-weight: 650; }
+
+  .ficha--estado { align-items: center; }
+  .escudo {
+    display: grid; place-items: center; width: 44px; height: 44px; flex: none;
+    border-radius: 11px; background: rgba(34, 197, 94, .13); color: #22c55e;
+  }
+  .estado-ok { display: block; color: #22c55e; font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+  .ficha__pie { font-size: 11px; color: var(--sl-500); }
+
+  /* pestañas */
+  .pestanas {
+    display: flex; gap: 20px; padding: 0 16px;
+    border-bottom: 1px solid rgba(148, 163, 184, .14);
+  }
+  .pestana { padding: 11px 0; font-size: 12.5px; color: var(--sl-500); white-space: nowrap; }
+  .pestana--activa { color: #38bdf8; box-shadow: inset 0 -2px 0 #38bdf8; font-weight: 600; }
+
+  .seccion-titulo {
+    display: flex; align-items: center; gap: 7px;
+    padding: 14px 16px 0; font-size: 10px; font-weight: 700;
+    letter-spacing: .11em; text-transform: uppercase; color: #38bdf8;
+  }
+
+  /* gauges */
+  .gauges {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+    gap: 10px; padding: 12px 16px 18px;
+  }
+  .gauge {
+    background: var(--sl-800); border: 1px solid rgba(148, 163, 184, .14);
+    border-radius: 11px; padding: 11px; min-width: 0;
+  }
+  .gauge header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+  .gauge__icono {
+    display: grid; place-items: center; width: 21px; height: 21px; flex: none;
+    border-radius: 6px; background: rgba(56, 189, 248, .13); color: #38bdf8;
+  }
+  .gauge__etiqueta {
+    font-size: 10.5px; color: var(--sl-400); font-weight: 550;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .gauge__caja { position: relative; }
+  .gauge__svg { width: 100%; height: auto; display: block; }
+  .gauge__arco { transition: stroke-dasharray 1.5s cubic-bezier(.25, .8, .3, 1); }
+
+  .gauge__centro {
+    position: absolute; inset-inline: 0; top: 50%; transform: translateY(-25%);
+    text-align: center; pointer-events: none;
+  }
+  .gauge__valor {
+    display: block; font-size: 21px; font-weight: 700; color: #fff;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .gauge__unidad { font-size: 10px; color: var(--sl-500); }
+
+  .gauge footer {
+    display: flex; justify-content: space-between;
+    margin-top: 3px; font-size: 9px; color: var(--sl-600);
+  }
+
+  @media (max-width: 900px) {
+    .fichas { grid-template-columns: 1fr; }
+    .pestanas { overflow-x: auto; scrollbar-width: none; }
+    .pestanas::-webkit-scrollbar { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vista--flotante { animation: none; }
+    .gauge__arco { transition: none; }
+  }
+</style>
+
+<script>
+  const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function activar(vista: Element) {
+    vista.querySelectorAll<SVGPathElement>('.gauge__arco').forEach((arco, i) => {
+      const p = arco.dataset.pct ?? '0';
+      setTimeout(() => { arco.setAttribute('stroke-dasharray', `${p} 100`); }, reducido ? 0 : i * 110);
+    });
+
+    vista.querySelectorAll<HTMLElement>('.gauge__valor').forEach((el, i) => {
+      const hasta = parseFloat(el.dataset.hasta ?? '0');
+      const dec = parseInt(el.dataset.decimales ?? '0', 10);
+      const fmt = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+      if (reducido) { el.textContent = fmt(hasta); return; }
+
+      setTimeout(() => {
+        const inicio = performance.now();
+        const paso = (ahora: number) => {
+          const t = Math.min(1, (ahora - inicio) / 1500);
+          el.textContent = fmt(hasta * (1 - Math.pow(1 - t, 3)));
+          if (t < 1) requestAnimationFrame(paso);
+        };
+        requestAnimationFrame(paso);
+      }, i * 110);
+    });
+  }
+
+  document.querySelectorAll('.vista').forEach((vista) => {
+    const io = new IntersectionObserver((entradas) => {
+      for (const e of entradas) {
+        if (!e.isIntersecting) continue;
+        activar(e.target);
+        io.disconnect();
+      }
+    }, { threshold: 0.15 });
+    io.observe(vista);
+  });
+</script>

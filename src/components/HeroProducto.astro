@@ -1,0 +1,211 @@
+---
+import VistaProducto from './VistaProducto.astro';
+---
+
+<section class="hp">
+  <!-- Fondo: foto industrial propia + capas de marca -->
+  <div class="hp__foto" aria-hidden="true"></div>
+  <div class="hp__velo" aria-hidden="true"></div>
+  <canvas id="hp-red" class="hp__red" aria-hidden="true"></canvas>
+  <div class="hp__brillo" aria-hidden="true"></div>
+
+  <div class="contenedor hp__rejilla">
+    <div class="hp__texto">
+      <span class="hp__insignia">
+        <i class="hp__led" aria-hidden="true"></i>
+        Monitoreo industrial · Chile
+      </span>
+
+      <h1>
+        Deja de enterarte<br />
+        <span class="hp__grad">cuando ya paró.</span>
+      </h1>
+
+      <p class="hp__bajada">
+        Conectamos los variadores y sensores de tu línea, mostramos cada variable
+        en el momento en que ocurre y avisamos cuando un equipo empieza a
+        comportarse distinto. Antes de la falla, no después.
+      </p>
+
+      <div class="hp__acciones">
+        <a href="/contacto/" class="btn btn--primario">
+          Solicitar cotización
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+        </a>
+        <a href="/amprod/" class="btn btn--fantasma">Ver la plataforma</a>
+      </div>
+
+      <ul class="hp__sellos">
+        <li><b>7</b> variables por equipo</li>
+        <li><b>24/7</b> sin pausa entre turnos</li>
+        <li><b>100 %</b> exportable</li>
+      </ul>
+    </div>
+
+    <div class="hp__producto">
+      <span class="hp__etiqueta">
+        <i aria-hidden="true">●</i> En vivo desde AMPROD
+      </span>
+      <VistaProducto flotante />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hp {
+    position: relative;
+    background: var(--nx-noche);
+    color: #dbe4f5;
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(56px, 8vw, 92px) 0 clamp(64px, 9vw, 104px);
+  }
+
+  /* Foto propia de la plataforma, muy atenuada: da textura sin competir */
+  .hp__foto {
+    position: absolute; inset: 0; z-index: 0;
+    background: url('/img/industrial.jpg') center right / cover no-repeat;
+    opacity: .16;
+    filter: grayscale(.3) contrast(1.05);
+    mask-image: radial-gradient(130% 100% at 72% 45%, #000 18%, transparent 72%);
+    -webkit-mask-image: radial-gradient(130% 100% at 72% 45%, #000 18%, transparent 72%);
+  }
+  .hp__velo {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      linear-gradient(100deg, var(--nx-noche) 22%, rgba(11, 18, 48, .72) 52%, rgba(11, 18, 48, .9) 100%),
+      radial-gradient(90% 70% at 20% 30%, rgba(34, 42, 114, .55), transparent 70%);
+  }
+  .hp__red { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; }
+  .hp__brillo {
+    position: absolute; z-index: 0; pointer-events: none;
+    width: 46vmax; height: 46vmax; left: -15vmax; top: -18vmax;
+    border-radius: 50%; filter: blur(100px);
+    background: radial-gradient(circle, rgba(45, 102, 171, .5), transparent 66%);
+    animation: hp-flotar 18s ease-in-out infinite alternate;
+  }
+  @keyframes hp-flotar { to { transform: translate3d(5vmax, 3vmax, 0) scale(1.12); } }
+
+  .hp__rejilla {
+    position: relative; z-index: 2;
+    display: grid; gap: clamp(36px, 5vw, 56px);
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    align-items: center;
+  }
+
+  .hp__insignia {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 7px 16px; margin-bottom: 22px; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .05);
+    backdrop-filter: blur(10px);
+    font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #9edcf2;
+  }
+  .hp__led {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--nx-cian);
+    box-shadow: 0 0 0 0 rgba(70, 192, 216, .6);
+    animation: hp-latir 2.3s cubic-bezier(.2, .7, .3, 1) infinite;
+  }
+  @keyframes hp-latir { 70% { box-shadow: 0 0 0 9px rgba(70, 192, 216, 0); } 100% { box-shadow: 0 0 0 0 rgba(70, 192, 216, 0); } }
+
+  .hp__texto :global(h1) { color: #fff; max-width: 15ch; font-size: clamp(33px, 4.6vw, 56px); }
+  .hp__grad {
+    background: linear-gradient(100deg, #9edcf2, #46C0D8 48%, #7fb6ff);
+    background-size: 220% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: hp-vaiven 9s ease-in-out infinite;
+  }
+  @keyframes hp-vaiven { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+  .hp__bajada { margin-top: 22px; max-width: 48ch; font-size: clamp(15.5px, 1.5vw, 17.5px); color: #a9b6d4; }
+  .hp__acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+  .hp__sellos {
+    display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 34px;
+    padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .1);
+    list-style: none; font-size: 13.5px; color: #8e9cbe;
+  }
+  .hp__sellos b { color: #fff; font-weight: 700; margin-right: 5px; }
+
+  .hp__producto { position: relative; }
+  .hp__etiqueta {
+    position: absolute; top: -13px; left: 16px; z-index: 3;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 13px; border-radius: 999px;
+    background: var(--nx-azul); color: #fff;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    box-shadow: 0 8px 20px -8px rgba(45, 102, 171, .9);
+  }
+  .hp__etiqueta i { font-style: normal; font-size: 8px; animation: hp-parpadeo 2s ease-in-out infinite; }
+  @keyframes hp-parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+  @media (max-width: 1000px) {
+    .hp__rejilla { grid-template-columns: 1fr; }
+    .hp__texto :global(h1) { max-width: 18ch; }
+    .hp__foto { mask-image: radial-gradient(150% 80% at 70% 20%, #000 10%, transparent 70%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hp__brillo, .hp__grad, .hp__etiqueta i { animation: none; }
+  }
+</style>
+
+<script>
+  // Red de sensores, sutil: acompaña la foto sin taparla.
+  const lienzo = document.getElementById('hp-red') as HTMLCanvasElement | null;
+  if (lienzo && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const ctx = lienzo.getContext('2d')!;
+    type Nodo = { x: number; y: number; vx: number; vy: number; r: number; f: number };
+    let ancho = 0, alto = 0, nodos: Nodo[] = [], anim = 0;
+    const ENLACE = 140;
+
+    function medir() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      ancho = lienzo!.clientWidth;
+      alto = lienzo!.clientHeight;
+      lienzo!.width = ancho * dpr;
+      lienzo!.height = alto * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const n = Math.round(Math.min(60, Math.max(18, (ancho * alto) / 26000)));
+      nodos = Array.from({ length: n }, () => ({
+        x: Math.random() * ancho, y: Math.random() * alto,
+        vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+        r: Math.random() * 1.3 + 0.7, f: Math.random() * Math.PI * 2,
+      }));
+    }
+
+    function pintar(t: number) {
+      ctx.clearRect(0, 0, ancho, alto);
+      for (const n of nodos) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > ancho) n.vx *= -1;
+        if (n.y < 0 || n.y > alto) n.vy *= -1;
+      }
+      for (let i = 0; i < nodos.length; i++) {
+        for (let j = i + 1; j < nodos.length; j++) {
+          const a = nodos[i], b = nodos[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > ENLACE * ENLACE) continue;
+          ctx.strokeStyle = `rgba(110, 170, 235, ${(1 - Math.sqrt(d2) / ENLACE) * 0.14})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+      for (const n of nodos) {
+        const pulso = 0.5 + 0.5 * Math.sin(t / 800 + n.f);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(158, 220, 242, ${0.14 + 0.2 * pulso})`;
+        ctx.fill();
+      }
+      anim = requestAnimationFrame(pintar);
+    }
+
+    addEventListener('resize', medir, { passive: true });
+    document.addEventListener('visibilitychange', () => {
+      cancelAnimationFrame(anim);
+      if (!document.hidden) anim = requestAnimationFrame(pintar);
+    });
+    medir();
+    anim = requestAnimationFrame(pintar);
+  }
+</script>

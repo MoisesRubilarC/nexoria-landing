@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import VistaProducto from '../components/VistaProducto.astro';
 
 const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden);
 const amprod = productos.find((p) => p.id === 'amprod') ?? productos[0];
@@ -38,6 +39,14 @@ const etiquetaEstado = {
 
   {amprod && (
     <>
+      <section class="seccion seccion--vista">
+        <div class="contenedor">
+          <div class="vista-envoltura revelar">
+            <VistaProducto />
+          </div>
+        </div>
+      </section>
+
       <section class="seccion">
         <div class="contenedor">
           <div class="intro revelar">
@@ -109,6 +118,9 @@ const etiquetaEstado = {
 </Base>
 
 <style>
+  .seccion--vista { background: var(--nx-noche); padding-block: clamp(44px, 6vw, 72px); }
+  .vista-envoltura { max-width: 980px; margin: 0 auto; }
+
   .intro { display: grid; gap: 40px; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); align-items: start; }
   .intro__logo { width: 100%; max-width: 280px; height: auto; }
   .intro__texto { font-size: 17.5px; color: var(--texto-2); }

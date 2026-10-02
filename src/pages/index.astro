@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import HeroProducto from '../components/HeroProducto.astro';
 import Icono from '../components/Icono.astro';
 import Clientes from '../components/Clientes.astro';
 import Telemetria from '../components/Telemetria.astro';
@@ -26,18 +26,7 @@ const pasos = [
   titulo="Nexoria"
   descripcion="Monitoreo industrial en tiempo real y mantenimiento predictivo. Conectamos los datos de tu línea de producción para anticipar fallas antes de que ocurran."
 >
-  <Hero
-    sobretitulo="Monitoreo industrial"
-    titulo="Tu planta,"
-    destacado="en tiempo real."
-    bajada="Conectamos los sensores y variadores de tu línea de producción, mostramos lo que está pasando ahora y avisamos antes de que un equipo falle."
-  >
-    <a href="/contacto/" class="btn btn--primario">
-      Solicitar cotización
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-    </a>
-    <a href="/amprod/" class="btn btn--fantasma">Conocer AMPROD</a>
-  </Hero>
+  <HeroProducto />
 
   <Telemetria />
   <Cifras />
