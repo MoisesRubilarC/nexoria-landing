@@ -1,0 +1,16 @@
+/* Paleta Nexoria — tokens CSS. Copiar a cualquier proyecto. */
+:root {
+  --nx-indigo: #222A72;   /* Índigo Nexoria: texto principal, inicio de degradados */
+  --nx-azul:   #2D66AB;   /* Azul medio */
+  --nx-cielo:  #31A5DD;   /* Azul cielo */
+  --nx-cian:   #46C0D8;   /* Cian: nodos, acentos, estados "en línea" */
+  --nx-tag-1:  #3F5084;   /* Tagline (inicio) */
+  --nx-tag-2:  #669BBD;   /* Tagline (fin) */
+  --nx-noche:  #0B1230;   /* Fondo oscuro de marca */
+  --nx-noche-2:#111A42;   /* Superficie sobre fondo oscuro */
+
+  --nx-degradado: linear-gradient(90deg, #222A72 0%, #2D66AB 55%, #41B4DC 100%);
+  --nx-degradado-oscuro: linear-gradient(90deg, #FFFFFF 0%, #9EDCF2 100%);
+
+  --nx-fuente: "Montserrat", system-ui, sans-serif; /* 700 logotipo/títulos · 500 texto */
+}

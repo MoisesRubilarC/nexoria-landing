@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content';
+
+// La sección entera desaparece si todavía no hay clientes publicados.
+// Agregar uno desde /admin la hace aparecer sola, sin tocar código.
+const clientes = (await getCollection('clientes'))
+  .filter((c) => c.data.publicado)
+  .sort((a, b) => a.data.orden - b.data.orden);
+---
+
+{clientes.length > 0 && (
+  <section class="seccion seccion--gris">
+    <div class="contenedor">
+      <div class="cabecera cabecera--centro revelar">
+        <span class="sobretitulo">Confían en nosotros</span>
+        <h2>Plantas que ya operan con Nexoria</h2>
+      </div>
+
+      <ul class="clientes">
+        {clientes.map((c) => {
+          const Marco = c.data.sitio ? 'a' : 'div';
+          return (
+            <li class="revelar">
+              <Marco
+                class="cliente"
+                {...(c.data.sitio ? { href: c.data.sitio, rel: 'noopener', target: '_blank' } : {})}
+              >
+                {c.data.logo
+                  ? <img src={c.data.logo} alt={c.data.nombre} class="cliente__logo" loading="lazy" />
+                  : <span class="cliente__nombre">{c.data.nombre}</span>}
+                <span class="cliente__rubro">{c.data.rubro}</span>
+              </Marco>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
+)}
+
+<style>
+  .clientes {
+    list-style: none; display: grid; gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+  .cliente {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; min-height: 130px; padding: 24px 20px;
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    text-align: center; color: inherit;
+    transition: transform .25s ease, box-shadow .3s ease, border-color .25s ease;
+  }
+  .cliente:hover { transform: translateY(-3px); box-shadow: var(--sombra-alta); border-color: #c5d8ea; }
+  .cliente__logo { max-height: 46px; width: auto; object-fit: contain; }
+  .cliente__nombre { font-size: 19px; font-weight: 700; color: var(--nx-indigo); letter-spacing: -.02em; }
+  .cliente__rubro { font-size: 13px; color: var(--texto-3); }
+</style>

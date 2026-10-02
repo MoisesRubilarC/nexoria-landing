@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+
+const servicios = (await getCollection('servicios')).sort(
+  (a, b) => a.data.orden - b.data.orden
+).slice(0, 5);
+
+const anio = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div class="contenedor pie__rejilla">
+    <div class="pie__marca">
+      <img src="/marca/svg/nexoria-horizontal-tagline-oscuro.svg" alt="Nexoria" class="pie__logo" width="200" height="56" />
+      <p class="pie__lema">
+        Conectamos los datos de tu planta con las decisiones que hay que tomar hoy.
+      </p>
+    </div>
+
+    <nav class="pie__col" aria-label="Servicios">
+      <h3 class="pie__titulo">Servicios</h3>
+      {servicios.map((s) => (
+        <a href={`/servicios/${s.id}/`} class="pie__enlace">{s.data.titulo}</a>
+      ))}
+    </nav>
+
+    <nav class="pie__col" aria-label="Empresa">
+      <h3 class="pie__titulo">Empresa</h3>
+      <a href="/nosotros/" class="pie__enlace">Nosotros</a>
+      <a href="/amprod/" class="pie__enlace">AMPROD</a>
+      <a href="/contacto/" class="pie__enlace">Cotizar</a>
+      <a href="https://amprod.nexoriachile.com/" class="pie__enlace" rel="noopener">Ingresar a la plataforma</a>
+    </nav>
+
+    <div class="pie__col">
+      <h3 class="pie__titulo">Contacto</h3>
+      <a href="mailto:contacto@nexoriachile.com" class="pie__enlace">contacto@nexoriachile.com</a>
+      <span class="pie__dato">Concepción, Región del Biobío</span>
+      <span class="pie__dato">Chile</span>
+    </div>
+  </div>
+
+  <div class="contenedor pie__base">
+    <span>© {anio} Nexoria SpA. Todos los derechos reservados.</span>
+    <span class="pie__estado"><i class="led"></i> Plataforma operativa</span>
+  </div>
+</footer>
+
+<style>
+  .pie { background: var(--nx-noche); color: #a9b6d4; padding: clamp(52px, 7vw, 76px) 0 28px; }
+  .pie__rejilla {
+    display: grid; gap: 40px 32px;
+    grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
+  }
+  .pie__logo { height: 52px; width: auto; }
+  .pie__lema { margin-top: 18px; font-size: 15px; max-width: 34ch; color: #8e9cbe; }
+
+  .pie__col { display: flex; flex-direction: column; }
+  .pie__titulo { font-size: 12.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+  .pie__enlace { color: #a9b6d4; font-size: 14.5px; padding: 6px 0; transition: color .2s ease; }
+  .pie__enlace:hover { color: var(--nx-cian); }
+  .pie__dato { font-size: 14.5px; padding: 6px 0; color: #7c89ab; }
+
+  .pie__base {
+    margin-top: clamp(40px, 5vw, 60px); padding-top: 22px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    display: flex; flex-wrap: wrap; gap: 10px 20px;
+    justify-content: space-between; font-size: 13.5px; color: #707d9f;
+  }
+  .pie__estado { display: inline-flex; align-items: center; gap: 8px; }
+  .led {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--nx-cian);
+    box-shadow: 0 0 0 0 rgba(70, 192, 216, .6);
+    animation: latido 2.4s cubic-bezier(.2, .7, .3, 1) infinite;
+  }
+  @keyframes latido {
+    70% { box-shadow: 0 0 0 8px rgba(70, 192, 216, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(70, 192, 216, 0); }
+  }
+
+  @media (max-width: 900px) { .pie__rejilla { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .pie__rejilla { grid-template-columns: 1fr; gap: 32px; } }
+</style>

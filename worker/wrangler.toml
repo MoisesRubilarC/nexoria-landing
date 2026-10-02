@@ -1,0 +1,13 @@
+name = "nexoria-web"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# Secretos (NO van aquí, se cargan con `wrangler secret put <NOMBRE>`):
+#   RESEND_API_KEY
+#   GITHUB_CLIENT_ID
+#   GITHUB_CLIENT_SECRET
+
+# Opcional: servir el Worker bajo el propio dominio en vez de *.workers.dev
+# [[routes]]
+# pattern = "api.nexoriachile.com/*"
+# zone_name = "nexoriachile.com"

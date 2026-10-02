@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+
+// TODO (revisar con el equipo): cargos, descripciones y cifras de esta página
+// son un borrador. Ajustar antes de difundir el sitio.
+const valores = [
+  {
+    t: 'Cercanía con la planta',
+    d: 'Trabajamos en terreno, junto a los equipos de mantención y operaciones. Nada de soluciones diseñadas a distancia que después nadie usa.',
+  },
+  {
+    t: 'Tecnología sin humo',
+    d: 'Usamos la herramienta que resuelve el problema. Si un indicador simple basta, no vendemos un modelo complejo.',
+  },
+  {
+    t: 'Los datos son tuyos',
+    d: 'La información de tu operación te pertenece. Entregamos acceso completo y exportable, sin dejarte amarrado a nosotros.',
+  },
+  {
+    t: 'Acompañamos de verdad',
+    d: 'No entregamos un acceso y desaparecemos. Ajustamos y sumamos equipos a medida que crece el histórico.',
+  },
+];
+
+const equipo = [
+  { nombre: 'Moisés Rubilar', cargo: 'Cofundador · Desarrollo y plataforma' },
+  { nombre: 'Eduardo Albornoz', cargo: 'Cofundador · Operaciones e implementación' },
+];
+---
+
+<Base
+  titulo="Nosotros"
+  descripcion="Nexoria es una empresa chilena de monitoreo industrial. Conectamos los datos de planta con las decisiones de mantención y operación."
+>
+  <Hero
+    compacto
+    sobretitulo="Nosotros"
+    titulo="Conectamos datos."
+    destacado="Impulsamos decisiones."
+    bajada="Somos una empresa chilena dedicada al monitoreo industrial. Nacimos de ver el mismo problema una y otra vez: plantas llenas de datos que nadie alcanza a usar a tiempo."
+  />
+
+  <section class="seccion">
+    <div class="contenedor relato">
+      <div class="revelar">
+        <span class="sobretitulo">La historia</span>
+        <h2>Partimos por un problema concreto</h2>
+      </div>
+      <div class="relato__texto revelar">
+        <p>
+          Los equipos de una línea de producción generan información todo el día: corriente,
+          temperatura, velocidad, horas de operación. Casi toda esa información se queda
+          dentro del equipo y solo se revisa cuando ya hubo una parada.
+        </p>
+        <p>
+          Nexoria nace para cerrar esa brecha. Empezamos conectando variadores de frecuencia,
+          que son críticos y a la vez de los más desatendidos, y construimos
+          <a href="/amprod/">AMPROD</a> para que esa información quede disponible de forma
+          continua, con el histórico necesario para analizar y anticipar.
+        </p>
+        <p>
+          Hoy seguimos ampliando la plataforma a más tipos de equipo y variable, con el mismo
+          criterio de siempre: que el dato sirva para tomar una decisión concreta, no para
+          llenar un tablero.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--gris">
+    <div class="contenedor">
+      <div class="cabecera cabecera--centro revelar">
+        <span class="sobretitulo">Cómo trabajamos</span>
+        <h2>En qué creemos</h2>
+      </div>
+      <div class="rejilla rejilla--2">
+        {valores.map((v) => (
+          <article class="tarjeta revelar">
+            <h3>{v.t}</h3>
+            <p>{v.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="cabecera cabecera--centro revelar">
+        <span class="sobretitulo">Equipo</span>
+        <h2>Quiénes estamos detrás</h2>
+      </div>
+      <div class="rejilla rejilla--3">
+        {equipo.map((p) => (
+          <article class="tarjeta persona revelar">
+            <span class="persona__inicial">{p.nombre.charAt(0)}</span>
+            <h3>{p.nombre}</h3>
+            <p>{p.cargo}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--noche">
+    <div class="contenedor cabecera cabecera--centro revelar" style="margin-bottom:0">
+      <h2>Trabajemos juntos</h2>
+      <p class="bajada">
+        Si tienes una planta que monitorear o una idea de por dónde partir, escríbenos.
+      </p>
+      <div style="display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:30px">
+        <a href="/contacto/" class="btn btn--primario">Contáctanos</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .relato { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; }
+  .relato__texto { font-size: 17.5px; color: var(--texto-2); }
+  .relato__texto p { margin-bottom: 20px; max-width: 62ch; }
+
+  .persona { text-align: center; }
+  .persona__inicial {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 62px; height: 62px; margin-bottom: 16px; border-radius: 50%;
+    background: var(--nx-degradado); color: #fff;
+    font-size: 26px; font-weight: 700;
+  }
+
+  @media (max-width: 860px) { .relato { grid-template-columns: 1fr; gap: 20px; } }
+</style>

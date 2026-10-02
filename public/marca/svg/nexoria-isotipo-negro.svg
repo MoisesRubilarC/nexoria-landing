@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 129.2 129.2" width="129" height="129" role="img" aria-label="Nexoria">
+  <title>Nexoria</title>
+<g transform="translate(0 0)">
+  <g transform="scale(0.17)">
+    <path d="M80 405 V217 L335 70 L478 152" stroke="#000000" stroke-width="82" stroke-linejoin="round" fill="none"/>
+    <path d="M590 330 V512 L335 660 L176 568" stroke="#000000" stroke-width="82" stroke-linejoin="round" fill="none"/>
+    <path d="M0 468 C45 428 100 400 156 380 C104 412 52 452 18 486 Z" fill="#000000"/>
+    <path d="M192 692 C64 692 -6 618 34 548 C120 420 380 304 646 236 L656 262 C430 334 236 430 156 524 C116 572 120 642 192 692 Z" fill="#000000"/>
+    <path d="M66 618 C84 500 300 366 604 258 C390 344 218 432 146 552 C124 590 98 618 66 618 Z" fill="#000000"/>
+    <path d="M268 306 C372 242 466 198 546 166 L562 196 C470 228 376 270 268 306 Z" fill="#000000"/>
+    <path d="M601 151 L684 104" stroke="#000000" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="712" cy="90" r="34" stroke="#000000" stroke-width="26" fill="none"/>
+    <circle cx="576" cy="166" r="34" stroke="#000000" stroke-width="26" fill="none"/>
+    <circle cx="672" cy="232" r="34" stroke="#000000" stroke-width="26" fill="none"/>
+  </g></g>
+</svg>

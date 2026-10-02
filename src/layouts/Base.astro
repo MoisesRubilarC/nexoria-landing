@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import Encabezado from '../components/Encabezado.astro';
+import PieDePagina from '../components/PieDePagina.astro';
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+  imagen?: string;
+}
+
+const { titulo, descripcion, imagen = '/marca/png/nexoria-horizontal-color-1024.png' } = Astro.props;
+const url = new URL(Astro.url.pathname, Astro.site);
+const imagenAbs = new URL(imagen, Astro.site);
+const tituloCompleto = titulo === 'Nexoria' ? titulo : `${titulo} · Nexoria`;
+---
+
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{tituloCompleto}</title>
+  <meta name="description" content={descripcion} />
+  <link rel="canonical" href={url} />
+  <meta name="theme-color" content="#0B1230" />
+
+  <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nexoria" />
+  <meta property="og:locale" content="es_CL" />
+  <meta property="og:title" content={tituloCompleto} />
+  <meta property="og:description" content={descripcion} />
+  <meta property="og:url" content={url} />
+  <meta property="og:image" content={imagenAbs} />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preload" href="/fuentes/Montserrat[wght].ttf" as="font" type="font/ttf" crossorigin />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Nexoria',
+    url: 'https://nexoriachile.com/',
+    logo: 'https://nexoriachile.com/marca/png/nexoria-horizontal-color-1024.png',
+    email: 'contacto@nexoriachile.com',
+    description: 'Monitoreo industrial en tiempo real y mantenimiento predictivo para líneas de producción.',
+    address: { '@type': 'PostalAddress', addressLocality: 'Concepción', addressRegion: 'Biobío', addressCountry: 'CL' },
+  })} />
+</head>
+
+<body>
+  <a href="#principal" class="saltar">Saltar al contenido</a>
+  <Encabezado />
+  <main id="principal">
+    <slot />
+  </main>
+  <PieDePagina />
+
+  <style is:global>
+    .saltar {
+      position: absolute; left: 12px; top: -60px; z-index: 100;
+      background: var(--nx-indigo); color: #fff; padding: 10px 18px;
+      border-radius: 0 0 10px 10px; font-weight: 600; transition: top .2s ease;
+    }
+    .saltar:focus { top: 0; }
+  </style>
+
+  <script>
+    // Aparición progresiva de los bloques marcados con .revelar
+    const objetivos = document.querySelectorAll('.revelar');
+    if (objetivos.length) {
+      const io = new IntersectionObserver(
+        (entradas) => {
+          for (const e of entradas) {
+            if (!e.isIntersecting) continue;
+            (e.target as HTMLElement).classList.add('visible');
+            io.unobserve(e.target);
+          }
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+      );
+      objetivos.forEach((o, i) => {
+        (o as HTMLElement).style.transitionDelay = `${Math.min(i % 6, 5) * 70}ms`;
+        io.observe(o);
+      });
+    }
+  </script>
+</body>
+</html>

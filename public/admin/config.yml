@@ -1,0 +1,115 @@
+# Panel de contenido de nexoriachile.com
+# Al guardar, el CMS hace commit en GitHub y el sitio se reconstruye solo.
+
+backend:
+  name: github
+  repo: MoisesRubilarC/nexoria-landing
+  branch: main
+  # Worker de Cloudflare que resuelve el login (ver worker/src/index.js).
+  # Reemplazar por la URL real del Worker después de desplegarlo.
+  base_url: https://nexoria-web.TU-SUBDOMINIO.workers.dev
+  auth_endpoint: auth
+
+site_url: https://nexoriachile.com
+display_url: https://nexoriachile.com
+logo_url: /marca/svg/nexoria-horizontal-color.svg
+
+media_folder: public/img
+public_folder: /img
+
+locale: es
+
+collections:
+  # ---------------- Servicios ----------------
+  - name: servicios
+    label: Servicios
+    label_singular: Servicio
+    folder: src/content/servicios
+    create: true
+    delete: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    summary: '{{titulo}}'
+    sortable_fields: [orden, titulo]
+    fields:
+      - { name: titulo, label: Título, widget: string }
+      - { name: resumen, label: Resumen corto, widget: text, hint: 'Una o dos líneas. Aparece en las tarjetas del sitio.' }
+      - name: icono
+        label: Ícono
+        widget: select
+        default: senal
+        options:
+          - { label: 'Señal / onda', value: senal }
+          - { label: 'Temperatura', value: temperatura }
+          - { label: 'Predicción', value: prediccion }
+          - { label: 'Alerta', value: alerta }
+          - { label: 'Integración', value: integracion }
+          - { label: 'Tablero', value: tablero }
+      - { name: orden, label: Orden, widget: number, default: 99, value_type: int, hint: 'Menor número aparece primero.' }
+      - { name: destacado, label: Mostrar en la portada, widget: boolean, default: false }
+      - name: puntos
+        label: Qué incluye
+        widget: list
+        required: false
+        field: { name: punto, label: Punto, widget: string }
+      - { name: body, label: Descripción larga, widget: markdown }
+
+  # ---------------- Productos ----------------
+  - name: productos
+    label: Productos
+    label_singular: Producto
+    folder: src/content/productos
+    create: true
+    delete: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    summary: '{{nombre}}'
+    sortable_fields: [orden, nombre]
+    fields:
+      - { name: nombre, label: Nombre, widget: string }
+      - { name: lema, label: Lema, widget: string, hint: 'Frase corta bajo el nombre.' }
+      - { name: resumen, label: Resumen, widget: text }
+      - name: estado
+        label: Estado
+        widget: select
+        default: disponible
+        options:
+          - { label: Disponible, value: disponible }
+          - { label: En beta, value: beta }
+          - { label: En desarrollo, value: desarrollo }
+      - { name: url, label: Enlace a la plataforma, widget: string, required: false, pattern: ['^https?://.+', 'Debe empezar con http:// o https://'] }
+      - { name: imagen, label: Imagen, widget: image, required: false }
+      - name: caracteristicas
+        label: Características
+        widget: list
+        required: false
+        fields:
+          - { name: titulo, label: Título, widget: string }
+          - { name: detalle, label: Detalle, widget: text }
+      - { name: orden, label: Orden, widget: number, default: 99, value_type: int }
+      - { name: body, label: Descripción larga, widget: markdown }
+
+  # ---------------- Clientes ----------------
+  - name: clientes
+    label: Clientes
+    label_singular: Cliente
+    folder: src/content/clientes
+    create: true
+    delete: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    summary: '{{nombre}} — {{rubro}}'
+    sortable_fields: [orden, nombre]
+    fields:
+      - { name: nombre, label: Nombre, widget: string }
+      - { name: rubro, label: Rubro, widget: string, hint: 'Ej: Industria alimentaria, Minería, Forestal.' }
+      - { name: logo, label: Logo, widget: image, required: false, hint: 'PNG o SVG con fondo transparente. Si no hay logo se muestra el nombre.' }
+      - { name: sitio, label: Sitio web, widget: string, required: false, pattern: ['^https?://.+', 'Debe empezar con http:// o https://'] }
+      - { name: publicado, label: Mostrar en el sitio, widget: boolean, default: false, hint: 'Déjalo apagado hasta tener autorización del cliente.' }
+      - { name: orden, label: Orden, widget: number, default: 99, value_type: int }
+    # Los clientes no llevan texto largo.
+    editor:
+      preview: false

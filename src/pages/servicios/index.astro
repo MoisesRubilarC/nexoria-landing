@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import Icono from '../../components/Icono.astro';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden - b.data.orden);
+---
+
+<Base
+  titulo="Servicios"
+  descripcion="Monitoreo continuo, telemetría industrial, mantenimiento predictivo, alertas, integración en planta y tableros a medida."
+>
+  <Hero
+    compacto
+    sobretitulo="Servicios"
+    titulo="Todo lo que necesita"
+    destacado="una planta conectada"
+    bajada="Desde el levantamiento en terreno hasta los modelos que anticipan una falla. Puedes tomar el proceso completo o solo la parte que te falta."
+  >
+    <a href="/contacto/" class="btn btn--primario">Solicitar cotización</a>
+  </Hero>
+
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="rejilla rejilla--3">
+        {servicios.map((s) => (
+          <a href={`/servicios/${s.id}/`} class="tarjeta servicio revelar">
+            <span class="servicio__icono"><Icono nombre={s.data.icono} tam={22} /></span>
+            <h3>{s.data.titulo}</h3>
+            <p>{s.data.resumen}</p>
+            {s.data.puntos.length > 0 && (
+              <ul class="servicio__puntos">
+                {s.data.puntos.slice(0, 3).map((p) => <li>{p}</li>)}
+              </ul>
+            )}
+            <span class="servicio__mas">
+              Ver detalle
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--noche">
+    <div class="contenedor cabecera cabecera--centro revelar" style="margin-bottom:0">
+      <h2>¿No ves lo que necesitas?</h2>
+      <p class="bajada">
+        Cada planta es distinta. Cuéntanos tu caso y evaluamos juntos si podemos ayudarte.
+      </p>
+      <div style="display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:30px">
+        <a href="/contacto/" class="btn btn--primario">Conversemos</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .servicio { display: block; color: inherit; }
+  .servicio__icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 12px; margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(34, 42, 114, .1), rgba(70, 192, 216, .16));
+    color: var(--nx-azul);
+  }
+  .servicio__puntos { margin: 16px 0 0; padding-left: 18px; color: var(--texto-2); font-size: 14.5px; }
+  .servicio__puntos li { margin-top: 6px; }
+  .servicio__puntos li::marker { color: var(--nx-cian); }
+  .servicio__mas {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 20px;
+    font-size: 14.5px; font-weight: 600; color: var(--nx-azul);
+  }
+  .servicio:hover .servicio__mas svg { transform: translateX(3px); }
+  .servicio__mas svg { transition: transform .2s ease; }
+</style>

@@ -1,0 +1,109 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import Icono from '../../components/Icono.astro';
+
+export async function getStaticPaths() {
+  const servicios = await getCollection('servicios');
+  return servicios.map((servicio) => ({
+    params: { slug: servicio.id },
+    props: { servicio },
+  }));
+}
+
+const { servicio } = Astro.props;
+const { Content } = await render(servicio);
+
+const otros = (await getCollection('servicios'))
+  .filter((s) => s.id !== servicio.id)
+  .sort((a, b) => a.data.orden - b.data.orden)
+  .slice(0, 3);
+---
+
+<Base titulo={servicio.data.titulo} descripcion={servicio.data.resumen}>
+  <Hero
+    compacto
+    sobretitulo="Servicio"
+    titulo={servicio.data.titulo}
+    bajada={servicio.data.resumen}
+  >
+    <a href="/contacto/" class="btn btn--primario">Cotizar este servicio</a>
+    <a href="/servicios/" class="btn btn--fantasma">Ver todos</a>
+  </Hero>
+
+  <section class="seccion">
+    <div class="contenedor detalle">
+      <div class="detalle__texto revelar">
+        <Content />
+      </div>
+
+      {servicio.data.puntos.length > 0 && (
+        <aside class="detalle__lado revelar">
+          <div class="caja">
+            <span class="caja__icono"><Icono nombre={servicio.data.icono} tam={22} /></span>
+            <h3>Qué incluye</h3>
+            <ul>
+              {servicio.data.puntos.map((p) => <li>{p}</li>)}
+            </ul>
+            <a href="/contacto/" class="btn btn--primario" style="width:100%;justify-content:center;margin-top:22px">
+              Solicitar cotización
+            </a>
+          </div>
+        </aside>
+      )}
+    </div>
+  </section>
+
+  {otros.length > 0 && (
+    <section class="seccion seccion--gris">
+      <div class="contenedor">
+        <div class="cabecera revelar"><h2>Otros servicios</h2></div>
+        <div class="rejilla rejilla--3">
+          {otros.map((s) => (
+            <a href={`/servicios/${s.id}/`} class="tarjeta revelar" style="color:inherit">
+              <h3>{s.data.titulo}</h3>
+              <p>{s.data.resumen}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .detalle { display: grid; gap: 44px; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); align-items: start; }
+  .detalle__texto { font-size: 17px; color: var(--texto-2); }
+  .detalle__texto :global(p) { margin-bottom: 18px; max-width: 62ch; }
+  .detalle__texto :global(h2) { margin: 34px 0 14px; }
+  .detalle__texto :global(ul) { padding-left: 20px; margin-bottom: 18px; }
+  .detalle__texto :global(li) { margin-top: 8px; }
+
+  .caja {
+    position: sticky; top: 96px;
+    background: #fff; border: 1px solid var(--borde); border-radius: var(--radio);
+    padding: 28px; box-shadow: var(--sombra);
+  }
+  .caja__icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px; margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(34, 42, 114, .1), rgba(70, 192, 216, .16));
+    color: var(--nx-azul);
+  }
+  .caja ul { list-style: none; margin-top: 16px; }
+  .caja li {
+    position: relative; padding-left: 26px; margin-top: 12px;
+    font-size: 15px; color: var(--texto-2);
+  }
+  .caja li::before {
+    content: ''; position: absolute; left: 0; top: 7px;
+    width: 14px; height: 9px; border-left: 2px solid var(--nx-cian);
+    border-bottom: 2px solid var(--nx-cian); transform: rotate(-45deg);
+  }
+
+  @media (max-width: 880px) {
+    .detalle { grid-template-columns: 1fr; }
+    .caja { position: static; }
+  }
+</style>

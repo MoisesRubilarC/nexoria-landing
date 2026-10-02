@@ -1,0 +1,220 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+
+const servicios = (await getCollection('servicios')).sort((a, b) => a.data.orden - b.data.orden);
+
+// Endpoint del Worker de Cloudflare que envía el correo con Resend.
+// Se define en .env como PUBLIC_ENDPOINT_COTIZACION.
+const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
+---
+
+<Base
+  titulo="Contacto y cotización"
+  descripcion="Cuéntanos qué equipos quieres monitorear y te preparamos una propuesta a tu medida, sin costo y sin compromiso."
+>
+  <Hero
+    compacto
+    sobretitulo="Hablemos"
+    titulo="Cuéntanos de tu planta"
+    bajada="Completa el formulario y te respondemos dentro de un día hábil con una propuesta ajustada a tu operación. Sin costo y sin compromiso."
+  />
+
+  <section class="seccion">
+    <div class="contenedor contacto">
+      <form class="formulario revelar" id="form-cotizacion" data-endpoint={endpoint} novalidate>
+        <div class="campos">
+          <label class="campo">
+            <span>Nombre y apellido <i>*</i></span>
+            <input type="text" name="nombre" required autocomplete="name" maxlength="120" />
+          </label>
+
+          <label class="campo">
+            <span>Empresa <i>*</i></span>
+            <input type="text" name="empresa" required autocomplete="organization" maxlength="120" />
+          </label>
+
+          <label class="campo">
+            <span>Correo <i>*</i></span>
+            <input type="email" name="correo" required autocomplete="email" maxlength="160" />
+          </label>
+
+          <label class="campo">
+            <span>Teléfono</span>
+            <input type="tel" name="telefono" autocomplete="tel" maxlength="40" placeholder="+56 9 ..." />
+          </label>
+
+          <label class="campo campo--ancho">
+            <span>¿Qué te interesa?</span>
+            <select name="servicio">
+              <option value="">Prefiero explicarlo abajo</option>
+              {servicios.map((s) => <option value={s.data.titulo}>{s.data.titulo}</option>)}
+              <option value="AMPROD (demo de la plataforma)">AMPROD — demo de la plataforma</option>
+            </select>
+          </label>
+
+          <label class="campo campo--ancho">
+            <span>Cuéntanos tu caso <i>*</i></span>
+            <textarea
+              name="mensaje"
+              rows="6"
+              required
+              maxlength="4000"
+              placeholder="Qué equipos tienes, cuántos son, qué te gustaría monitorear o qué problema estás tratando de resolver."
+            ></textarea>
+          </label>
+        </div>
+
+        <!-- Trampa anti-spam: invisible para personas, tentadora para bots. -->
+        <div class="trampa" aria-hidden="true">
+          <label>No llenar este campo<input type="text" name="sitio_web" tabindex="-1" autocomplete="off" /></label>
+        </div>
+
+        <div class="envio">
+          <button type="submit" class="btn btn--primario" id="btn-enviar">
+            Enviar solicitud
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+          </button>
+          <p class="nota">Usamos tus datos solo para responderte esta consulta.</p>
+        </div>
+
+        <p class="aviso" id="aviso" role="status" aria-live="polite" hidden></p>
+      </form>
+
+      <aside class="lado revelar">
+        <div class="tarjeta">
+          <h3>Contacto directo</h3>
+          <p>Si prefieres escribirnos tú:</p>
+          <a href="mailto:contacto@nexoriachile.com" class="lado__enlace">contacto@nexoriachile.com</a>
+          <hr />
+          <h3>Dónde estamos</h3>
+          <p>Concepción, Región del Biobío, Chile.<br />Trabajamos con plantas de todo el país.</p>
+          <hr />
+          <h3>¿Ya eres cliente?</h3>
+          <p>Entra directo a la plataforma.</p>
+          <a href="https://amprod.nexoriachile.com/" class="btn btn--secundario" rel="noopener" style="margin-top:12px">
+            Ingresar a AMPROD
+          </a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contacto { display: grid; gap: 40px; grid-template-columns: minmax(0, 1.7fr) minmax(290px, 1fr); align-items: start; }
+
+  .campos { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; }
+  .campo { display: flex; flex-direction: column; gap: 8px; }
+  .campo--ancho { grid-column: 1 / -1; }
+  .campo > span { font-size: 14px; font-weight: 600; color: var(--nx-indigo); }
+  .campo i { color: #c0392b; font-style: normal; }
+
+  input, select, textarea {
+    font-family: inherit; font-size: 15.5px; color: var(--texto);
+    padding: 12px 14px; border: 1px solid var(--borde); border-radius: var(--radio-sm);
+    background: #fff; width: 100%;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  textarea { resize: vertical; min-height: 130px; }
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--nx-cielo);
+    box-shadow: 0 0 0 4px rgba(49, 165, 221, .14);
+  }
+  input[aria-invalid='true'], textarea[aria-invalid='true'] { border-color: #c0392b; }
+
+  .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  .envio { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 26px; }
+  .nota { font-size: 13.5px; color: var(--texto-3); }
+
+  .aviso { margin-top: 20px; padding: 14px 18px; border-radius: var(--radio-sm); font-size: 15px; }
+  .aviso.ok { background: rgba(70, 192, 216, .12); color: #146b80; border: 1px solid rgba(70, 192, 216, .4); }
+  .aviso.error { background: #fdf0ee; color: #a5342a; border: 1px solid #f0c8c2; }
+
+  .lado .tarjeta { position: sticky; top: 96px; }
+  .lado h3 { font-size: 17px; }
+  .lado p { font-size: 15px; }
+  .lado__enlace { display: inline-block; margin-top: 8px; font-weight: 600; word-break: break-all; }
+  .lado hr { border: none; border-top: 1px solid var(--borde); margin: 22px 0; }
+
+  @media (max-width: 880px) {
+    .contacto { grid-template-columns: 1fr; }
+    .lado .tarjeta { position: static; }
+  }
+  @media (max-width: 560px) { .campos { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  const form = document.getElementById('form-cotizacion') as HTMLFormElement;
+  const boton = document.getElementById('btn-enviar') as HTMLButtonElement;
+  const aviso = document.getElementById('aviso') as HTMLParagraphElement;
+  const endpoint = form.dataset.endpoint ?? '';
+
+  function mostrar(texto: string, tipo: 'ok' | 'error') {
+    aviso.textContent = texto;
+    aviso.className = `aviso ${tipo}`;
+    aviso.hidden = false;
+  }
+
+  // Respaldo: si el Worker todavía no está configurado, abrimos el correo.
+  function porCorreo(datos: FormData) {
+    const cuerpo = [
+      `Nombre: ${datos.get('nombre')}`,
+      `Empresa: ${datos.get('empresa')}`,
+      `Correo: ${datos.get('correo')}`,
+      `Teléfono: ${datos.get('telefono') || '—'}`,
+      `Interés: ${datos.get('servicio') || '—'}`,
+      '',
+      String(datos.get('mensaje') ?? ''),
+    ].join('\n');
+    location.href =
+      `mailto:contacto@nexoriachile.com?subject=${encodeURIComponent('Solicitud de cotización — ' + datos.get('empresa'))}` +
+      `&body=${encodeURIComponent(cuerpo)}`;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Validación propia para poder marcar los campos y dar un mensaje en español.
+    let primeroInvalido: HTMLElement | null = null;
+    for (const el of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]')) {
+      const malo = !el.checkValidity();
+      el.setAttribute('aria-invalid', String(malo));
+      if (malo && !primeroInvalido) primeroInvalido = el;
+    }
+    if (primeroInvalido) {
+      mostrar('Revisa los campos marcados: faltan datos o el correo no es válido.', 'error');
+      primeroInvalido.focus();
+      return;
+    }
+
+    const datos = new FormData(form);
+    if (datos.get('sitio_web')) return; // bot
+
+    if (!endpoint) { porCorreo(datos); return; }
+
+    boton.disabled = true;
+    const textoOriginal = boton.innerHTML;
+    boton.textContent = 'Enviando…';
+    aviso.hidden = true;
+
+    try {
+      const r = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(datos)),
+      });
+      if (!r.ok) throw new Error(String(r.status));
+      form.reset();
+      mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
+    } catch {
+      mostrar('No pudimos enviar el formulario. Te abrimos el correo para que lo mandes directo.', 'error');
+      porCorreo(datos);
+    } finally {
+      boton.disabled = false;
+      boton.innerHTML = textoOriginal;
+    }
+  });
+</script>

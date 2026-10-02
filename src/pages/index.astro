@@ -1,0 +1,181 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Icono from '../components/Icono.astro';
+import Clientes from '../components/Clientes.astro';
+import Telemetria from '../components/Telemetria.astro';
+
+const servicios = (await getCollection('servicios'))
+  .filter((s) => s.data.destacado)
+  .sort((a, b) => a.data.orden - b.data.orden);
+
+const productos = (await getCollection('productos')).sort((a, b) => a.data.orden - b.data.orden);
+
+const pasos = [
+  { n: '01', t: 'Levantamiento', d: 'Visitamos la planta, identificamos los equipos críticos y definimos qué variables importan para tu operación.' },
+  { n: '02', t: 'Conexión', d: 'Instalamos y configuramos la captura de datos sin detener la línea, integrando los equipos que ya tienes.' },
+  { n: '03', t: 'Puesta en marcha', d: 'Dejamos los tableros y las alertas funcionando, y capacitamos al equipo de mantención y operaciones.' },
+  { n: '04', t: 'Acompañamiento', d: 'Ajustamos umbrales, sumamos equipos y afinamos los modelos a medida que se acumula histórico.' },
+];
+---
+
+<Base
+  titulo="Nexoria"
+  descripcion="Monitoreo industrial en tiempo real y mantenimiento predictivo. Conectamos los datos de tu línea de producción para anticipar fallas antes de que ocurran."
+>
+  <Hero
+    sobretitulo="Monitoreo industrial"
+    titulo="Tu planta,"
+    destacado="en tiempo real."
+    bajada="Conectamos los sensores y variadores de tu línea de producción, mostramos lo que está pasando ahora y avisamos antes de que un equipo falle."
+  >
+    <a href="/contacto/" class="btn btn--primario">
+      Solicitar cotización
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+    </a>
+    <a href="/amprod/" class="btn btn--fantasma">Conocer AMPROD</a>
+  </Hero>
+
+  <Telemetria />
+
+  <!-- Servicios destacados -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="cabecera cabecera--centro revelar">
+        <span class="sobretitulo">Qué hacemos</span>
+        <h2>De los datos sueltos a <span class="grad">decisiones concretas</span></h2>
+        <p class="bajada">
+          Tus equipos ya generan información. El problema es que queda encerrada en cada
+          máquina y solo se revisa cuando algo falló. Nosotros la sacamos de ahí.
+        </p>
+      </div>
+
+      <div class="rejilla rejilla--3">
+        {servicios.map((s) => (
+          <a href={`/servicios/${s.id}/`} class="tarjeta servicio revelar">
+            <span class="servicio__icono"><Icono nombre={s.data.icono} tam={22} /></span>
+            <h3>{s.data.titulo}</h3>
+            <p>{s.data.resumen}</p>
+            <span class="servicio__mas">
+              Ver más
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+            </span>
+          </a>
+        ))}
+      </div>
+
+      <div class="centrado revelar">
+        <a href="/servicios/" class="btn btn--secundario">Ver todos los servicios</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Producto -->
+  {productos.length > 0 && (
+    <section class="seccion seccion--gris">
+      <div class="contenedor">
+        <div class="cabecera cabecera--centro revelar">
+          <span class="sobretitulo">Nuestra plataforma</span>
+          <h2>Productos Nexoria</h2>
+        </div>
+
+        <div class="rejilla rejilla--2">
+          {productos.map((p) => (
+            <article class="tarjeta producto revelar">
+              <div class="producto__cab">
+                <h3>{p.data.nombre}</h3>
+                <span class:list={['pastilla', `pastilla--${p.data.estado}`]}>
+                  {p.data.estado === 'disponible' ? 'Disponible' : p.data.estado === 'beta' ? 'En beta' : 'En desarrollo'}
+                </span>
+              </div>
+              <p class="producto__lema">{p.data.lema}</p>
+              <p>{p.data.resumen}</p>
+              <div class="producto__acciones">
+                <a href="/amprod/" class="btn btn--secundario">Ver detalle</a>
+                {p.data.url && <a href={p.data.url} class="btn btn--primario" rel="noopener">Ingresar</a>}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Cómo trabajamos -->
+  <section class="seccion">
+    <div class="contenedor">
+      <div class="cabecera revelar">
+        <span class="sobretitulo">Cómo trabajamos</span>
+        <h2>De la primera visita a la planta monitoreada</h2>
+      </div>
+
+      <ol class="pasos">
+        {pasos.map((p) => (
+          <li class="paso revelar">
+            <span class="paso__n">{p.n}</span>
+            <h3>{p.t}</h3>
+            <p>{p.d}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <Clientes />
+
+  <!-- Llamado final -->
+  <section class="seccion seccion--noche cta">
+    <div class="contenedor cabecera cabecera--centro revelar" style="margin-bottom:0">
+      <h2>¿Conversamos sobre tu planta?</h2>
+      <p class="bajada">
+        Cuéntanos qué equipos quieres monitorear y te preparamos una propuesta a tu medida,
+        sin costo y sin compromiso.
+      </p>
+      <div class="cta__acciones">
+        <a href="/contacto/" class="btn btn--primario">Solicitar cotización</a>
+        <a href="mailto:contacto@nexoriachile.com" class="btn btn--fantasma">contacto@nexoriachile.com</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .servicio { display: block; color: inherit; }
+  .servicio__icono {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: 12px; margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(34, 42, 114, .1), rgba(70, 192, 216, .16));
+    color: var(--nx-azul);
+  }
+  .servicio__mas {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 18px;
+    font-size: 14.5px; font-weight: 600; color: var(--nx-azul);
+  }
+  .servicio:hover .servicio__mas svg { transform: translateX(3px); }
+  .servicio__mas svg { transition: transform .2s ease; }
+
+  .centrado { display: flex; justify-content: center; margin-top: 40px; }
+
+  .producto__cab { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .producto__lema { font-weight: 600; color: var(--nx-azul) !important; margin-top: 8px !important; }
+  .producto__acciones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .pastilla {
+    font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 11px; border-radius: 999px;
+  }
+  .pastilla--disponible { background: rgba(70, 192, 216, .16); color: #1a7f96; }
+  .pastilla--beta { background: rgba(49, 165, 221, .15); color: #1d6f99; }
+  .pastilla--desarrollo { background: #eef1f6; color: var(--texto-3); }
+
+  .pasos { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); list-style: none; }
+  .paso { position: relative; padding: 26px 22px 26px 0; border-top: 2px solid var(--fondo-3); }
+  .paso__n {
+    display: block; font-size: 13px; font-weight: 700; letter-spacing: .12em;
+    color: var(--nx-cielo); margin-bottom: 12px;
+  }
+  .paso h3 { font-size: 18.5px; }
+  .paso p { margin-top: 10px; color: var(--texto-2); font-size: 15px; }
+
+  .cta__acciones { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; margin-top: 32px; }
+</style>

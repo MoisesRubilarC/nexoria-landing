@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 129.2 129.2" width="129" height="129" role="img" aria-label="Nexoria">
+  <title>Nexoria</title>
+<g transform="translate(0 0)"><defs>
+    <linearGradient id="nxh1" x1="60" y1="420" x2="480" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3F8EE0"/><stop offset="1" stop-color="#4FC0F0"/></linearGradient>
+    <linearGradient id="nxh2" x1="600" y1="320" x2="200" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4FC0F0"/><stop offset=".6" stop-color="#3F8EE0"/><stop offset="1" stop-color="#3C63D0"/></linearGradient>
+    <linearGradient id="nxb" x1="40" y1="640" x2="690" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3C63D0"/><stop offset=".45" stop-color="#3F8EE0"/><stop offset="1" stop-color="#4FC0F0"/></linearGradient>
+    <linearGradient id="nxl" x1="100" y1="600" x2="560" y2="270" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4FC0F0"/><stop offset="1" stop-color="#7ADCF5"/></linearGradient>
+  </defs>
+  <g transform="scale(0.17)">
+    <path d="M80 405 V217 L335 70 L478 152" stroke="url(#nxh1)" stroke-width="82" stroke-linejoin="round" fill="none"/>
+    <path d="M590 330 V512 L335 660 L176 568" stroke="url(#nxh2)" stroke-width="82" stroke-linejoin="round" fill="none"/>
+    <path d="M0 468 C45 428 100 400 156 380 C104 412 52 452 18 486 Z" fill="#3C63D0"/>
+    <path d="M192 692 C64 692 -6 618 34 548 C120 420 380 304 646 236 L656 262 C430 334 236 430 156 524 C116 572 120 642 192 692 Z" fill="url(#nxb)"/>
+    <path d="M66 618 C84 500 300 366 604 258 C390 344 218 432 146 552 C124 590 98 618 66 618 Z" fill="url(#nxl)"/>
+    <path d="M268 306 C372 242 466 198 546 166 L562 196 C470 228 376 270 268 306 Z" fill="url(#nxl)"/>
+    <path d="M601 151 L684 104" stroke="#7FE3F2" stroke-width="26" stroke-linecap="round"/>
+    <circle cx="712" cy="90" r="34" stroke="#7FE3F2" stroke-width="26" fill="none"/>
+    <circle cx="576" cy="166" r="34" stroke="#7FE3F2" stroke-width="26" fill="none"/>
+    <circle cx="672" cy="232" r="34" stroke="#7FE3F2" stroke-width="26" fill="none"/>
+  </g></g>
+</svg>
