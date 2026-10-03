@@ -1,6 +1,8 @@
 ---
 nombre: Camanchaca
 rubro: Industria alimentaria
-publicado: false
+logo: ''
+sitio: ''
+publicado: true
 orden: 1
 ---
