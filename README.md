@@ -16,9 +16,27 @@ npm run check      # tipos y diagnósticos de Astro
 
 ## Cómo se publica
 
-Cada `push` a `main` dispara `.github/workflows/deploy.yml`, que construye el
-sitio y lo publica en GitHub Pages. El archivo `public/CNAME` es lo que mantiene
-el dominio asociado: **no borrarlo**.
+Hay dos caminos, y conviene tener clara la diferencia:
+
+**Desde el código** — cada `push` a `main` dispara `.github/workflows/deploy.yml`,
+que construye el sitio y lo publica. Es decir: si trabajas en el repo, publicar
+es hacer push.
+
+**Desde el panel** — el panel `/admin` **no** guarda en `main`, guarda en la rama
+`borrador`. Ahí puedes crear, editar y borrar todo lo que quieras sin que el
+sitio cambie. Cuando ya está listo, vas a
+[Actions → Publicar cambios del panel](https://github.com/MoisesRubilarC/nexoria-landing/actions/workflows/publicar.yml)
+y aprietas **Run workflow**. Eso junta toda la tanda, la sube y despliega una
+sola vez.
+
+El archivo `public/CNAME` es lo que mantiene el dominio asociado: **no borrarlo**.
+
+### Si guardaste algo y no aparece
+
+El panel dice "guardado" apenas hace el commit, así que no se entera si el
+despliegue falló después. Para revisarlo:
+[Actions](https://github.com/MoisesRubilarC/nexoria-landing/actions) — una marca
+roja es un build caído, y el log dice exactamente qué campo lo rompió.
 
 ## Agregar contenido sin tocar código
 

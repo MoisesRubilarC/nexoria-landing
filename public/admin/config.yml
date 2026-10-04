@@ -1,10 +1,13 @@
 # Panel de contenido de nexoriachile.com
-# Al guardar, el CMS hace commit en GitHub y el sitio se reconstruye solo.
+# Al guardar, el CMS hace commit en la rama de borrador. El sitio NO cambia
+# hasta que corras "Publicar cambios del panel" en la pestaña Actions.
 
 backend:
   name: github
   repo: MoisesRubilarC/nexoria-landing
-  branch: main
+  # El panel guarda en 'borrador', que NO publica nada. Los cambios salen al
+  # sitio recién al correr "Publicar cambios del panel" en la pestaña Actions.
+  branch: borrador
   # Worker de Cloudflare que resuelve el login (ver worker/src/index.js).
   # Reemplazar por la URL real del Worker después de desplegarlo.
   base_url: https://nexoria-web.TU-SUBDOMINIO.workers.dev

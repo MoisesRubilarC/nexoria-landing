@@ -4,24 +4,27 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Permite que "Publicar cambios del panel" lo invoque tras fusionar.
+  workflow_call:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Un despliegue a la vez; si llegan varios commits, gana el último.
+# Nunca cancelamos un despliegue en curso: si se cancela, el sitio puede
+# quedarse con contenido viejo sin que nadie se entere.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   construir:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -34,7 +37,7 @@ jobs:
 
       - uses: actions/configure-pages@v5
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
