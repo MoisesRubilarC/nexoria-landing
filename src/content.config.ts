@@ -2,6 +2,13 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
+// El panel /admin guarda los campos opcionales vacíos como cadena vacía, no
+// como ausentes. Sin esto, dejar en blanco "sitio" o "logo" rompía el build
+// entero ("sitio: Invalid URL") y el sitio dejaba de publicarse.
+const vacioEsNada = (v: unknown) => (v === '' || v === null ? undefined : v);
+const urlOpcional = z.preprocess(vacioEsNada, z.url().optional());
+const textoOpcional = z.preprocess(vacioEsNada, z.string().optional());
+
 // Cada colección = una carpeta de archivos .md que el panel /admin escribe.
 // Agregar un servicio, producto o cliente NO requiere tocar código: basta un
 // archivo nuevo aquí (o guardar el formulario del panel).
@@ -25,8 +32,8 @@ const productos = defineCollection({
     lema: z.string(),
     resumen: z.string(),
     estado: z.enum(['disponible', 'beta', 'desarrollo']).default('disponible'),
-    url: z.url().optional(),
-    imagen: z.string().optional(),
+    url: urlOpcional,
+    imagen: textoOpcional,
     caracteristicas: z.array(z.object({
       titulo: z.string(),
       detalle: z.string(),
@@ -40,8 +47,8 @@ const clientes = defineCollection({
   schema: z.object({
     nombre: z.string(),
     rubro: z.string(),
-    logo: z.string().optional(),
-    sitio: z.url().optional(),
+    logo: textoOpcional,
+    sitio: urlOpcional,
     // Un cliente puede estar cargado pero no publicado todavía.
     publicado: z.boolean().default(true),
     orden: z.number().default(99),
