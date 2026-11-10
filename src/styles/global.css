@@ -95,6 +95,8 @@ h3 { font-size: clamp(19px, 2vw, 22px); letter-spacing: -.015em; }
 .btn--secundario:hover { transform: translateY(-2px); border-color: var(--nx-cielo); }
 .btn--fantasma { color: #fff; border-color: rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .06); }
 .btn--fantasma:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, .55); }
+.btn--wsp { color: #fff; background: #1faa57; border-color: #1faa57; }
+.btn--wsp:hover { transform: translateY(-2px); background: #25c166; border-color: #25c166; }
 .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 @media (max-width: 460px) {
   .btn { width: 100%; justify-content: center; padding: 14px 20px; }
