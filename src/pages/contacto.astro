@@ -87,6 +87,8 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
           <h3>Contacto directo</h3>
           <p>Si prefieres escribirnos tú:</p>
           <a href="mailto:contacto@nexoriachile.com" class="lado__enlace">contacto@nexoriachile.com</a>
+          <p style="margin-top:14px">Ventas, con Eduardo (comercial):</p>
+          <a href="tel:+56987412857" class="lado__enlace">+56 9 8741 2857</a>
           <hr />
           <h3>Dónde estamos</h3>
           <p>Concepción, Región del Biobío, Chile.<br />Trabajamos con plantas de todo el país.</p>
@@ -164,21 +166,7 @@ function montarFormulario() {
       aviso.hidden = false;
     }
 
-    // Respaldo: si el Worker todavía no está configurado, abrimos el correo.
-    function porCorreo(datos: FormData) {
-      const cuerpo = [
-        `Nombre: ${datos.get('nombre')}`,
-        `Empresa: ${datos.get('empresa')}`,
-        `Correo: ${datos.get('correo')}`,
-        `Teléfono: ${datos.get('telefono') || '—'}`,
-        `Interés: ${datos.get('servicio') || '—'}`,
-        '',
-        String(datos.get('mensaje') ?? ''),
-      ].join('\n');
-      location.href =
-        `mailto:contacto@nexoriachile.com?subject=${encodeURIComponent('Solicitud de cotización — ' + datos.get('empresa'))}` +
-        `&body=${encodeURIComponent(cuerpo)}`;
-    }
+    const msjFallo = 'No pudimos enviar el formulario. Escríbenos a contacto@nexoriachile.com o llama al comercial, Eduardo: +56 9 8741 2857.';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -199,7 +187,7 @@ function montarFormulario() {
       const datos = new FormData(form);
       if (datos.get('sitio_web')) return; // bot
 
-      if (!endpoint) { porCorreo(datos); return; }
+      if (!endpoint) { mostrar(msjFallo, 'error'); return; }
 
       boton.disabled = true;
       const textoOriginal = boton.innerHTML;
@@ -216,8 +204,7 @@ function montarFormulario() {
         form.reset();
         mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
       } catch {
-        mostrar('No pudimos enviar el formulario. Te abrimos el correo para que lo mandes directo.', 'error');
-        porCorreo(datos);
+        mostrar(msjFallo, 'error');
       } finally {
         boton.disabled = false;
         boton.innerHTML = textoOriginal;

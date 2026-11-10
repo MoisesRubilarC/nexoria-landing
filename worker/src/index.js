@@ -7,12 +7,15 @@
  *
  * Variables (wrangler secret put <NOMBRE>):
  *   RESEND_API_KEY        clave de Resend
+ *   NUCLEO_TOKEN          clave compartida con Núcleo (COTIZACIONES_TOKEN allá)
  *   GITHUB_CLIENT_ID      OAuth App de GitHub
  *   GITHUB_CLIENT_SECRET  OAuth App de GitHub
  */
 
 const ORIGENES = ['https://nexoriachile.com', 'https://www.nexoriachile.com'];
 const DESTINO = 'contacto@nexoriachile.com';
+const NUCLEO_URL = 'https://nexoria-ia.cl/api/cotizaciones';
+const COPIA = ['moises.rubilarc@gmail.com', 'eduandres.albornoz@gmail.com'];
 const REMITENTE = 'Sitio Nexoria <no-responder@nexoriachile.com>';
 
 // Un envío cada 30 s por IP, usando el caché del Worker (sin KV).
@@ -122,6 +125,31 @@ async function manejarCotizacion(peticion, entorno, origen) {
       </div>
     </div>`;
 
+  // Núcleo (seguimiento) y correo van por separado: si uno falla, el otro igual sale.
+  const [guardado, enviado] = await Promise.allSettled([
+    guardarEnNucleo(entorno, { nombre, empresa, correo, telefono, servicio, mensaje }),
+    enviarCorreo(entorno, { empresa, nombre, correo, html }),
+  ]);
+  if (guardado.status === 'rejected') console.error('Núcleo falló', guardado.reason);
+  if (enviado.status === 'rejected') console.error('Resend falló', enviado.reason);
+
+  if (guardado.status === 'rejected' && enviado.status === 'rejected') {
+    return json({ error: 'No se pudo enviar' }, 502, origen);
+  }
+  return json({ ok: true }, 200, origen);
+}
+
+async function guardarEnNucleo(entorno, datos) {
+  if (!entorno.NUCLEO_TOKEN) throw new Error('Falta NUCLEO_TOKEN');
+  const r = await fetch(NUCLEO_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-token': entorno.NUCLEO_TOKEN },
+    body: JSON.stringify(datos),
+  });
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+}
+
+async function enviarCorreo(entorno, { empresa, nombre, correo, html }) {
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -131,18 +159,13 @@ async function manejarCotizacion(peticion, entorno, origen) {
     body: JSON.stringify({
       from: REMITENTE,
       to: [DESTINO],
+      cc: COPIA,
       reply_to: correo,
       subject: `Cotización — ${empresa} (${nombre})`,
       html,
     }),
   });
-
-  if (!r.ok) {
-    console.error('Resend falló', r.status, await r.text());
-    return json({ error: 'No se pudo enviar' }, 502, origen);
-  }
-
-  return json({ ok: true }, 200, origen);
+  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
 }
 
 /* ---------- OAuth de GitHub para el panel /admin ---------- */
