@@ -89,6 +89,9 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
           <a href="mailto:contacto@nexoriachile.com" class="lado__enlace">contacto@nexoriachile.com</a>
           <p style="margin-top:14px">Ventas, con Eduardo (comercial):</p>
           <a href="tel:+56987412857" class="lado__enlace">+56 9 8741 2857</a>
+          <a href="https://wa.me/56987412857?text=Hola%2C%20quiero%20cotizar%20monitoreo%20con%20Nexoria." class="btn btn--secundario" rel="noopener" target="_blank" style="margin-top:12px">
+            Comuniquémonos por WhatsApp
+          </a>
           <hr />
           <h3>Dónde estamos</h3>
           <p>Concepción, Región del Biobío, Chile.<br />Trabajamos con plantas de todo el país.</p>
@@ -160,8 +163,17 @@ function montarFormulario() {
     const aviso = avisoEl;
     const endpoint = form.dataset.endpoint ?? '';
 
-    function mostrar(texto: string, tipo: 'ok' | 'error') {
+    function mostrar(texto: string, tipo: 'ok' | 'error', conWhatsapp = false) {
       aviso.textContent = texto;
+      if (conWhatsapp) {
+        const a = document.createElement('a');
+        a.href = 'https://wa.me/56987412857?text=Hola%2C%20quiero%20cotizar%20monitoreo%20con%20Nexoria.';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Comuniquémonos por WhatsApp';
+        a.style.cssText = 'display:inline-block;margin-top:8px;font-weight:700;text-decoration:underline';
+        aviso.append(document.createElement('br'), a);
+      }
       aviso.className = `aviso ${tipo}`;
       aviso.hidden = false;
     }
@@ -187,7 +199,7 @@ function montarFormulario() {
       const datos = new FormData(form);
       if (datos.get('sitio_web')) return; // bot
 
-      if (!endpoint) { mostrar(msjFallo, 'error'); return; }
+      if (!endpoint) { mostrar(msjFallo, 'error', true); return; }
 
       boton.disabled = true;
       const textoOriginal = boton.innerHTML;
@@ -204,7 +216,7 @@ function montarFormulario() {
         form.reset();
         mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
       } catch {
-        mostrar(msjFallo, 'error');
+        mostrar(msjFallo, 'error', true);
       } finally {
         boton.disabled = false;
         boton.innerHTML = textoOriginal;
