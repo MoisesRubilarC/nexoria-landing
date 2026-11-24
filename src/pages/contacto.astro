@@ -95,6 +95,12 @@ const endpoint = import.meta.env.PUBLIC_ENDPOINT_COTIZACION ?? '';
             </a>
           </div>
           <hr />
+          <h3>¿Quieres verlo en acción?</h3>
+          <p>Prueba la plataforma con datos de ejemplo, sin registrarte.</p>
+          <a href="https://amprod.nexoriachile.com/demo" class="btn btn--primario" rel="noopener" target="_blank" style="margin-top:12px">
+            Ver la demo
+          </a>
+          <hr />
           <h3>Dónde estamos</h3>
           <p>Concepción, Región del Biobío, Chile.<br />Trabajamos con plantas de todo el país.</p>
           <hr />
@@ -172,8 +178,17 @@ function montarFormulario() {
     const aviso = avisoEl;
     const endpoint = form.dataset.endpoint ?? '';
 
-    function mostrar(texto: string, tipo: 'ok' | 'error', conWhatsapp = false) {
+    function mostrar(texto: string, tipo: 'ok' | 'error', conWhatsapp = false, conDemo = false) {
       aviso.textContent = texto;
+      if (conDemo) {
+        const d = document.createElement('a');
+        d.href = 'https://amprod.nexoriachile.com/demo';
+        d.target = '_blank';
+        d.rel = 'noopener';
+        d.textContent = 'Mientras tanto, mira la demo de la plataforma';
+        d.style.cssText = 'display:inline-block;margin-top:8px;font-weight:700;text-decoration:underline';
+        aviso.append(document.createElement('br'), d);
+      }
       if (conWhatsapp) {
         const a = document.createElement('a');
         a.href = 'https://wa.me/56987412857?text=Hola%2C%20quiero%20cotizar%20monitoreo%20con%20Nexoria.';
@@ -223,7 +238,7 @@ function montarFormulario() {
         });
         if (!r.ok) throw new Error(String(r.status));
         form.reset();
-        mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok');
+        mostrar('¡Listo! Recibimos tu solicitud y te respondemos dentro de un día hábil.', 'ok', false, true);
       } catch {
         mostrar(msjFallo, 'error', true);
       } finally {
